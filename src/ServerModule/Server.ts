@@ -8,7 +8,7 @@ class AppServer{
         let host = ServerConfig.Host;
         let domain = ServerConfig.Domain;
         App.listen(port, ()=> {
-            console.log("Server is started at port "+ port);
+            console.log("Server is listening at port "+ port);
         });
     }
 }

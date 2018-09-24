@@ -18,6 +18,7 @@
     "@types/mongodb": "^3.1.7",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
+    "guid-typescript": "^1.0.7",
     "mongodb": "^3.1.6",
     "typescript": "^3.0.3"
   }

@@ -54,6 +54,7 @@ class AppRouter{
                             case "1":
                                 app.post(route.url, (req, res)=>{
                                     let reqData = req.body;
+                                    //let reqObj = JSON.parse(reqData);
                                     route.handler(reqData).then((obj)=>{
                                         Util.SendResponse(res, obj);
                                         res.end();
