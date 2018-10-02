@@ -14,3 +14,23 @@ class DataBaseConfig{
 }
 
 export let DBConfig = new DataBaseConfig().DBConfig;
+
+export const UserDBCollection = {
+    ActiveSession: "ActiveSession",
+    OrderDetail: "OrderDetail",
+    OrderArchive: "OrderArchive",
+    Notifications: "Notifications",
+    SessionArchive: "SessionArchive",
+    Products: "Products",
+    Retailers: "Retailers",
+    RetaileTransactions: "RetailTransactions",
+    ProductsArchive: "ProductsArchive"
+};
+
+export const MainDBCollection = {
+    Licenses: "Licenses",
+    ActiveSession: "ActiveSession",
+    Users: "Users",
+    UserDetail: "UserDetail",
+    LicenseDBDetails: "LicenseDBDetails"
+};
