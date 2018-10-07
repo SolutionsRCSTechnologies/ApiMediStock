@@ -2,13 +2,17 @@ import { Response } from 'express';
 import { RoutingHandler } from './RoutingHandler';
 class Utilies{
     SendResponse(res:Response, obj:any){
-        if(obj){
-            res.writeHead(200, {"Content-Type":"application/json"});
-            res.write(JSON.stringify(obj));
-        } else {
-            res.writeHead(200, {"Content-Type":"application/json"});
-            res.write("No data found!");
-        }
+        try {
+            if(obj){
+                res.writeHead(200, {"Content-Type":"application/json"});
+                res.write(JSON.stringify(obj));
+            } else {
+                res.writeHead(200, {"Content-Type":"application/json"});
+                res.write(JSON.stringify({message:"No data found!"}));
+            }
+        } catch (error) {
+            console.log(error);
+        }        
     }
 
     SendErrorResponse(res:Response,err:Error){
