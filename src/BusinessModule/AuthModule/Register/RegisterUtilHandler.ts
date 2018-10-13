@@ -127,20 +127,20 @@ class RegisterUtilHandler {
             if (reqData) {
                 retVal = new User();
                 retVal.UserType = "OWNER";
-                if (reqData.firstname) {
-                    retVal.FirstName = reqData.firstname;
+                if (reqData.ownerfirstname) {
+                    retVal.FirstName = reqData.ownerfirstname;
                 }
-                if (reqData.middlename) {
-                    retVal.MiddleName = reqData.middlename;
+                if (reqData.ownermiddlename) {
+                    retVal.MiddleName = reqData.ownermiddlename;
                 }
-                if (reqData.lastname) {
-                    retVal.LastName = reqData.lastname;
+                if (reqData.ownerlastname) {
+                    retVal.LastName = reqData.ownerlastname;
                 }
                 if (reqData.mobileno) {
                     retVal.MobileNo = reqData.mobileno;
                 }
-                if (reqData.userid) {
-                    retVal.UserId = reqData.userid;
+                if (reqData.ownerid) {
+                    retVal.UserId = reqData.ownerid;
                 }
                 if (reqData.address) {
                     retVal.Address = reqData.address;
