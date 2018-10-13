@@ -136,9 +136,16 @@ export class User {
     private mobileno: string;
     private usertype: string;
     private licensed: string;
-    private ownerrefid: ObjectID;
+    private ownerrefid: string;
+    private emailid: string;
 
-    public get OwnerRefId(): ObjectId {
+    public get EmailId(): string {
+        return this.emailid;
+    }
+    public set EmailId(val) {
+        this.emailid = val;
+    }
+    public get OwnerRefId(): string {
         return this.ownerrefid;
     }
     public set OwnerRefId(val) {
@@ -243,18 +250,25 @@ export class RegistrationDetail {
     private ownerfirstname: string;
     private ownerlastname: string;
     private ownermiddlename: string;
-    private maxsalespersons: number;
+    private maxusercount: number;
     private mobileno: number;
     private country: string;
     private address: string;
     private druglicense: string;
     private shopname: string;
     private active: string;
-    private salepersons: ObjectId[];
+    private users: string[];
     private shopnumber: string;
-    private ownerrefid: ObjectId;
+    private ownerrefid: string;
+    private emailid: string;
 
-    public get OwnerRefId(): ObjectID {
+    public get EmailId(): string {
+        return this.emailid;
+    }
+    public set EmailId(val) {
+        this.emailid = val;
+    }
+    public get OwnerRefId(): string {
         return this.ownerrefid;
     }
     public set OwnerRefId(val) {
@@ -272,11 +286,11 @@ export class RegistrationDetail {
     public set Active(val) {
         this.active = val;
     }
-    public get SalePersons(): ObjectId[] {
-        return this.salepersons;
+    public get Users(): string[] {
+        return this.users;
     }
-    public set SalePersons(val) {
-        this.salepersons = val;
+    public set Users(val) {
+        this.users = val;
     }
     public get Country(): string {
         return this.country;
@@ -314,11 +328,11 @@ export class RegistrationDetail {
     public set OwnerMiddleName(val) {
         this.ownermiddlename = val;
     }
-    public get MaxSalePersons(): number {
-        return this.maxsalespersons;
+    public get MaxUserCount(): number {
+        return this.maxusercount;
     }
-    public set MaxSalePersons(val) {
-        this.maxsalespersons = val;
+    public set MaxUserCount(val) {
+        this.maxusercount = val;
     }
     public get MobileNo(): number {
         return this.mobileno;

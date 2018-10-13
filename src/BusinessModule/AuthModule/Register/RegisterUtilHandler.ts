@@ -24,6 +24,42 @@ class RegisterUtilHandler {
                 if (reqData.druglicense) {
                     retVal.DrugLicense = reqData.druglicense;
                 }
+                if (reqData.emailid) {
+                    retVal.EmailId = reqData.emailid;
+                }
+            }
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
+
+    async GetRegistrationInfoFromDBEntity(reqData) {
+        let retVal: RegistrationDetail = null;
+        try {
+            if (reqData) {
+                retVal = new RegistrationDetail();
+                if (reqData.ownerid) {
+                    retVal.OwnerId = reqData.ownerid;
+                }
+                if (reqData.ownerfirstname) {
+                    retVal.OwnerFirstName = reqData.ownerfirstname;
+                }
+                if (reqData.ownermiddlename) {
+                    retVal.OwnerMiddleName = reqData.ownermiddlename;
+                }
+                if (reqData.ownerlastname) {
+                    retVal.OwnerLastName = reqData.ownerlastname;
+                }
+                if (reqData.mobileno) {
+                    retVal.MobileNo = reqData.mobileno;
+                }
+                if (reqData.druglicense) {
+                    retVal.DrugLicense = reqData.druglicense;
+                }
+                if (reqData.druglicense) {
+                    retVal.DrugLicense = reqData.druglicense;
+                }
             }
         } catch (e) {
             throw e;
@@ -39,7 +75,7 @@ class RegisterUtilHandler {
                 if (reqData.usertype) {
                     retVal.UserType = reqData.usertype;
                 } else {
-                    retVal.UserType = "SALESMAN";
+                    retVal.UserType = "USER";
                 }
                 if (reqData.firstname) {
                     retVal.FirstName = reqData.firstname;
@@ -61,6 +97,9 @@ class RegisterUtilHandler {
                 }
                 if (reqData.password) {
                     retVal.Password = reqData.password;
+                }
+                if (reqData.emailid) {
+                    retVal.EmailId = reqData.emailid;
                 }
                 if (reqData.createdby) {
                     retVal.CreatedBy = reqData.createdby;
@@ -109,6 +148,9 @@ class RegisterUtilHandler {
                 if (reqData.password) {
                     retVal.Password = reqData.password;
                 }
+                if (reqData.emailid) {
+                    retVal.EmailId = reqData.emailid;
+                }
                 if (reqData.createdby) {
                     retVal.CreatedBy = reqData.createdby;
                 } else {
@@ -149,13 +191,13 @@ class RegisterUtilHandler {
         return retVal;
     }
 
-    SetUserDataBase(userDBName: string) {
-        let isSuccessful = false;
-        if (userDBName && userDBName.length > 0 && userDBName.length < 11) {
+    // SetUserDataBase(userDBName: string) {
+    //     let isSuccessful = false;
+    //     if (userDBName && userDBName.length > 0 && userDBName.length < 11) {
 
-        }
-        return isSuccessful;
-    }
+    //     }
+    //     return isSuccessful;
+    // }
 }
 
 export let RegisterUtilHandle = new RegisterUtilHandler();
