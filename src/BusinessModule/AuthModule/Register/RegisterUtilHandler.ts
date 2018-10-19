@@ -1,4 +1,5 @@
 import { RegistrationDetail, User } from '../../../CommonModule/DBEntities';
+import { strict } from 'assert';
 
 class RegisterUtilHandler {
     async GetRegistrationInfoDoc(reqData) {
@@ -11,22 +12,62 @@ class RegisterUtilHandler {
                 }
                 if (reqData.ownerfirstname) {
                     retVal.OwnerFirstName = reqData.ownerfirstname;
+                } else {
+                    retVal.OwnerFirstName = "";
                 }
                 if (reqData.ownermiddlename) {
                     retVal.OwnerMiddleName = reqData.ownermiddlename;
+                } else {
+                    retVal.OwnerMiddleName = "";
                 }
                 if (reqData.ownerlastname) {
                     retVal.OwnerLastName = reqData.ownerlastname;
+                } else {
+                    retVal.OwnerLastName = "";
                 }
                 if (reqData.mobileno) {
                     retVal.MobileNo = reqData.mobileno;
+                } else {
+                    retVal.MobileNo = null;
                 }
                 if (reqData.druglicense) {
                     retVal.DrugLicense = reqData.druglicense;
+                } else {
+                    retVal.DrugLicense = "";
                 }
-                if (reqData.emailid) {
-                    retVal.EmailId = reqData.emailid;
+                if (reqData.shopname) {
+                    retVal.ShopName = reqData.shopname;
+                } else {
+                    retVal.ShopName = "";
                 }
+                if (reqData.shopnumber) {
+                    retVal.ShopNumber = reqData.shopnumber;
+                } else {
+                    retVal.ShopNumber = "";
+                }
+                if (reqData.maxusercount) {
+                    retVal.MaxUserCount = reqData.maxusercount;
+                } else {
+                    retVal.MaxUserCount = null;
+                }
+                if (reqData.licid) {
+                    retVal.LicId = reqData.licid;
+                } else {
+                    retVal.LicId = "";
+                }
+                if (reqData.createdby) {
+                    retVal.CreatedBy = reqData.createdby;
+                } else {
+                    retVal.CreatedBy = "System";
+                }
+                if (reqData.updatedby) {
+                    retVal.UpdatedBy = reqData.updatedby;
+                } else {
+                    retVal.UpdatedBy = "System";
+                }
+                retVal.CreatedAt = new Date();
+                retVal.UpdatedAt = new Date();
+                retVal.Active = 'Y';
             }
         } catch (e) {
             throw e;
@@ -44,22 +85,62 @@ class RegisterUtilHandler {
                 }
                 if (reqData.ownerfirstname) {
                     retVal.OwnerFirstName = reqData.ownerfirstname;
+                } else {
+                    retVal.OwnerFirstName = "";
                 }
                 if (reqData.ownermiddlename) {
                     retVal.OwnerMiddleName = reqData.ownermiddlename;
+                } else {
+                    retVal.OwnerMiddleName = "";
                 }
                 if (reqData.ownerlastname) {
                     retVal.OwnerLastName = reqData.ownerlastname;
+                } else {
+                    retVal.OwnerLastName = "";
                 }
                 if (reqData.mobileno) {
                     retVal.MobileNo = reqData.mobileno;
+                } else {
+                    retVal.MobileNo = null;
                 }
                 if (reqData.druglicense) {
                     retVal.DrugLicense = reqData.druglicense;
+                } else {
+                    retVal.DrugLicense = "";
                 }
-                if (reqData.druglicense) {
-                    retVal.DrugLicense = reqData.druglicense;
+                if (reqData.shopname) {
+                    retVal.ShopName = reqData.shopname;
+                } else {
+                    retVal.ShopName = "";
                 }
+                if (reqData.shopnumber) {
+                    retVal.ShopNumber = reqData.shopnumber;
+                } else {
+                    retVal.ShopNumber = "";
+                }
+                if (reqData.maxusercount) {
+                    retVal.MaxUserCount = reqData.maxusercount;
+                } else {
+                    retVal.MaxUserCount = null;
+                }
+                if (reqData.licid) {
+                    retVal.LicId = reqData.licid;
+                } else {
+                    retVal.LicId = "";
+                }
+                if (reqData.createdby) {
+                    retVal.CreatedBy = reqData.createdby;
+                } else {
+                    retVal.CreatedBy = "System";
+                }
+                if (reqData.updatedby) {
+                    retVal.UpdatedBy = reqData.updatedby;
+                } else {
+                    retVal.UpdatedBy = "System";
+                }
+                retVal.CreatedAt = new Date();
+                retVal.UpdatedAt = new Date();
+                retVal.Active = 'Y';
             }
         } catch (e) {
             throw e;
@@ -71,7 +152,7 @@ class RegisterUtilHandler {
         let retVal: User = null;
         try {
             if (reqData) {
-                retVal = new User();
+                retVal = new User(false);
                 if (reqData.usertype) {
                     retVal.UserType = reqData.usertype;
                 } else {
@@ -114,6 +195,7 @@ class RegisterUtilHandler {
                 retVal.CreatedAt = new Date();
                 retVal.UpdatedAt = new Date();
                 retVal.Active = 'Y';
+                retVal.Licensed = 'N';
             }
         } catch (e) {
             throw e;
@@ -125,7 +207,7 @@ class RegisterUtilHandler {
         let retVal: User = null;
         try {
             if (reqData) {
-                retVal = new User();
+                retVal = new User(true);
                 retVal.UserType = "OWNER";
                 if (reqData.ownerfirstname) {
                     retVal.FirstName = reqData.ownerfirstname;
@@ -190,14 +272,6 @@ class RegisterUtilHandler {
         }
         return retVal;
     }
-
-    // SetUserDataBase(userDBName: string) {
-    //     let isSuccessful = false;
-    //     if (userDBName && userDBName.length > 0 && userDBName.length < 11) {
-
-    //     }
-    //     return isSuccessful;
-    // }
 }
 
 export let RegisterUtilHandle = new RegisterUtilHandler();

@@ -16,21 +16,21 @@ class RegistrationOperations {
             if (isOwnerIdAvailable && isOwnerIdAvailable.ErrorCode == 0 && isOwnerIdAvailable.Result) {
                 //Get Owner User info
                 let ownerInfo: User = await RegisterUtilHandle.GetOwnerUserDoc(reqData);
-                ownerInfo.PersonId = await Util.GetCustomGuidStr('UO');
+                //ownerInfo.PersonId = await Util.GetCustomGuidStr('UO');
                 ownerInfo.OwnerRefId = ownerInfo.PersonId;
                 //Insert user details in User table as Owner
                 let owneridResponse = await RegistrationDBHandle.InsertUserInfo(ownerInfo);
                 if (owneridResponse) {
                     let ownerid = owneridResponse.Result;
                     //Get salesman user info if available
-                    let salepersons: User[] = await RegisterUtilHandle.GetSalePersons(reqData.salepersons);
+                    let salepersons: User[] = await RegisterUtilHandle.GetSalePersons(reqData.users);
                     //Insert salesman user info in USER table and get user ids
                     let userIds: string[] = [];
                     if (salepersons && salepersons.length > 0) {
                         for (let i = 0; i < salepersons.length; i++) {
                             //Set owner id
                             salepersons[i].OwnerRefId = ownerid;
-                            salepersons[i].PersonId = await Util.GetCustomGuidStr('US');
+                            //salepersons[i].PersonId = await Util.GetCustomGuidStr('US');
                             let uId = await RegistrationDBHandle.InsertUserInfo(salepersons[i]);
                             if (uId && uId.Result) {
                                 userIds.push(uId.Result);
@@ -41,7 +41,7 @@ class RegistrationOperations {
                     let registrationObj = await RegisterUtilHandle.GetRegistrationInfoDoc(reqData);
                     registrationObj.OwnerRefId = ownerid;
                     registrationObj.Users = userIds;
-                    registrationObj.RegId = await Util.GetCustomGuidStr('REG');
+                    //registrationObj.RegId = await Util.GetCustomGuidStr('REG');
                     //Register users in registration table
                     result = await RegistrationDBHandle.RegisterOwner(registrationObj);
                     retVal = result;
@@ -71,18 +71,34 @@ class RegistrationOperations {
                 if (!currentUsers) {
                     currentUsers = [];
                 }
-                //Get User info
-                let userInfo: User = await RegisterUtilHandle.GetUserDoc(reqData);
-                userInfo.PersonId = await Util.GetCustomGuidStr('US');
-                userInfo.OwnerRefId = ownerrefid;
-                //Insert user details in User table as Owner
-                let userrefidResponse = await RegistrationDBHandle.InsertUserInfo(userInfo);
-                if (userrefidResponse && userrefidResponse.ErrorCode == 0) {
-                    let userrefid = userrefidResponse.Result;
-                    //add new user's ref id in users array
-                    currentUsers.push(userrefid);
-                    //Update registration table
-                    retVal = await RegistrationDBHandle.AddNewUserInRegistration(ownerrefid, userrefid, currentUsers);
+                let salepersons: User[] = await RegisterUtilHandle.GetSalePersons(reqData.users);
+                //Insert salesman user info in USER table and get user ids
+                let unregistereduserids: string[] = [];
+                if (salepersons && salepersons.length > 0) {
+                    for (let i = 0; i < salepersons.length; i++) {
+                        let subResult = await RegistrationDBHandle.CheckExistingUserId(salepersons[i].UserId);
+                        if (subResult && subResult.ErrorCode == 0) {
+                            //Set owner id
+                            salepersons[i].OwnerRefId = ownerId;
+                            //salepersons[i].PersonId = await Util.GetCustomGuidStr('US');
+                            let uId = await RegistrationDBHandle.InsertUserInfo(salepersons[i]);
+                            if (uId && uId.Result) {
+                                if (currentUsers.findIndex(uId.Result) < 0) {
+                                    currentUsers.push(uId.Result);
+                                }
+                            }
+                        } else {
+                            unregistereduserids.push(salepersons[i].UserId);
+                        }
+                    }
+                    retVal = await RegistrationDBHandle.AddNewUserInRegistration(ownerrefid, currentUsers);
+                    retVal.Result = {
+                        registeredusers: currentUsers,
+                        unregisteredusers: unregistereduserids
+                    }
+                } else {
+                    retVal.Message = 'There are no user for registration.';
+                    retVal.ErrorCode = 7;
                 }
             } else {
                 //return response as owner id is not available
@@ -116,7 +132,9 @@ class RegistrationOperations {
                     }
                 }
                 if (isValid && req.users && req.users.length > 0) {
-                    req.users.foreach(ele => {
+
+                    for (let i = 0; i < req.users.length; i++) {
+                        let ele = req.users[i];
                         if (ele) {
                             if (isValid && !(ele.firstname && ele.userid && ele.password && ele.address && ele.mobileno && ele.emailid)) {
                                 isValid = false;
@@ -124,12 +142,24 @@ class RegistrationOperations {
                         } else {
                             isValid = false;
                         }
-                    });
+                    }
+
+                    // req.users.foreach(ele => {
+                    //     if (ele) {
+                    //         if (isValid && !(ele.firstname && ele.userid && ele.password && ele.address && ele.mobileno && ele.emailid)) {
+                    //             isValid = false;
+                    //             console.log(2);
+                    //         }
+                    //     } else {
+                    //         isValid = false;
+                    //     }
+                    // });
                 }
             } else {
                 isValid = false;
             }
         } catch (e) {
+            console.log(e);
             isValid = false;
         }
         return isValid;
@@ -140,6 +170,7 @@ class RegistrationOperations {
         try {
             if (reqData && reqData.content) {
                 let content = reqData.content;
+                console.log(1);
                 //Validate request data
                 if (await this.ValidateRequest(content)) {
                     let registrationType: string = content.registrationtype;
@@ -172,7 +203,73 @@ class RegistrationOperations {
         return retVal;
     }
 
+    async ValidateActivateUserRequest(req) {
+        let isValid: boolean = true;
+        try {
+            if (req) {
+                if (!req.ownerid) {
+                    isValid = false;
+                }
+                if (!req.userid) {
+                    if (req.users && req.users.length > 0) {
+                        req.users.forEach(user => {
+                            if (user) {
+                                if (isValid && !(user.firstname && user.userid && user.password && user.address && user.mobileno && user.emailid)) {
+                                    isValid = false;
+                                }
+                            } else {
+                                isValid = false;
+                            }
+                        });
+                    } else {
+                        isValid = false;
+                    }
+                }
+            } else {
+                isValid = false;
+            }
+        } catch (e) {
+            throw e;
+        }
+        return isValid;
+    }
 
+    async ActivateUser(reqData) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (reqData && reqData.content) {
+                let content = reqData.content;
+                //Validate request
+                if (await this.ValidateActivateUserRequest(content)) {
+                    if (content.ownerid) {
+                        let isActivate = false;
+                        if (content.userid) {
+                            //Find by owner id match with user id and activate the user
+                            if (content.active && content.active == 'Y') {
+                                isActivate = true;
+                            }
+                            retVal = await RegistrationDBHandle.ActivateUser(content.ownerid, content.userid, isActivate);
+                        } else {
+                            retVal.ErrorCode = 4;
+                            retVal.Message = 'User id must be present.';
+                        }
+                    } else {
+                        retVal.ErrorCode = 3;
+                        retVal.Message = 'Owner id must be present.';
+                    }
+                } else {
+                    retVal.ErrorCode = 2;
+                    retVal.Message = 'Request is not valid.';
+                }
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Empty request data.';
+            }
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
 }
 
 export let RegistrationOpHandle = new RegistrationOperations();

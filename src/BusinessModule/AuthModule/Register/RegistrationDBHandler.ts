@@ -10,6 +10,50 @@ import { ObjectId } from 'bson';
 
 class RegistrationDBHandler {
 
+    async CheckExistingUserId(userid) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        let errorCode: number = 0;
+        let result: boolean = false;
+        try {
+            if (userid) {
+                let config = DBConfig;
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                await db.collection(MainDBCollection.Users).findOne({ uesrid: userid, active: 'Y' }).then(res => {
+                    if (!res) {
+                        result = true;
+                    } else {
+                        errorCode = 2;
+                    }
+                }).catch(err => {
+                    throw err;
+                });
+            } else {
+                errorCode = 1;
+            }
+            retVal.ErrorCode = errorCode;
+            switch (errorCode) {
+                case 1:
+                    retVal.Message = 'Empty user id.';
+                    break;
+                case 2:
+                    retVal.Message = 'User id is not available, it is already in use.';
+                    break;
+                default:
+                    retVal.Result = result;
+                    break;
+            }
+        } catch (e) {
+            throw e;
+        }
+        finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
 
     async CheckExistingOwnerId(reqData) {
         let retVal: MethodResponse = new MethodResponse();
@@ -269,12 +313,12 @@ class RegistrationDBHandler {
         return retVal;
     }
 
-    async AddNewUserInRegistration(ownerid: string, newuserid: string, updatedusers: string[]) {
+    async AddNewUserInRegistration(ownerid: string, updatedusers: string[]) {
         let retVal: MethodResponse = new MethodResponse();
         let mClient: MongoClient;
         let errorCode: number = 0;
         try {
-            if (ownerid && updatedusers && newuserid) {
+            if (ownerid && updatedusers) {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
@@ -299,7 +343,7 @@ class RegistrationDBHandler {
                     retVal.Message = 'Invalid input to add user.';
                     break;
                 default:
-                    retVal.Result = newuserid;
+                    retVal.Result = updatedusers;
                     break;
             }
         } catch (e) {
@@ -313,99 +357,135 @@ class RegistrationDBHandler {
         return retVal;
     }
 
-    // async RegisterStockist(reqData: any) {
-    //     let retVal = null;
-    //     let mClient: MongoClient;
-    //     let allowRegistration = false;
-    //     try {
-    //         if (reqData) {
-    //             let isRegistered: boolean = false;
-    //             let isActive = false;
-    //             let stockistname: string = reqData.stockistname;
-    //             let config = DBConfig;
-    //             mClient = await DBClient.GetMongoClient(config);
-    //             let db: Db = await mClient.db(config.MainDBName);
-    //             let existingStockist = await this.CheckExistingStockist(stockistname);
-    //             if (!existingStockist) {
-    //                 isRegistered = false;
-    //                 // await db.collection("RegistrationInfo").insertOne(reqData).then((onfulfiled)=>{
-    //                 //     if(onfulfiled){
-    //                 //         isRegistered = true;
-    //                 //     }
-    //                 // }, (onrejected)=>{
-    //                 //     isRegistered = false;
-    //                 // }).catch(err=>{
-    //                 //     isRegistered = false;
-    //                 // });
-    //             } else {
-    //                 let licenseid = existingStockist.licenseid;
-    //                 if (licenseid) {
-    //                     isActive = await this.CheckActiveLicense(licenseid);
-    //                     isRegistered = true;
-    //                 } else {
-    //                     isRegistered = false;
-    //                 }
-    //             }
-    //             if (!isRegistered) {
-    //                 //Stoockist info not registered
-    //                 allowRegistration = true;
-    //             } else if (!isActive) {
-    //                 allowRegistration = true;
-    //             }
-    //             if (allowRegistration) {
-    //                 let regdoc = "";//await this.GetRegistrationInfoDoc(reqData);
-    //                 if (regdoc) {
-    //                     await db.collection("RegistrationInfo").insertOne(regdoc);
-    //                 }
-    //             } else {
-    //                 //Registration is not allowed
-    //             }
-    //         } else {
-    //             //Empty requestobj
-    //         }
+    async ActivateUser(ownerid: string, userid: string, activate: boolean) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        let errorCode: number = 0;
+        let result = null;
+        let fResult = null;
+        try {
+            if (ownerid) {
+                let config = DBConfig;
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                await db.collection(MainDBCollection.Registrations).findOne({ ownerid: ownerid, active: 'Y' }).then(res => {
+                    if (res) {
+                        result = res;
+                    } else {
+                        errorCode = 2;
+                    }
+                }).catch(err => {
+                    throw err;
+                });
+                if (result) {
+                    let users = result.users;
+                    let ownerrefid = result.ownerrefid;
+                    let licid = result.licid;
 
-    //     } catch (e) {
-    //         throw e;
-    //     }
-    //     return retVal;
-    // }
-
-    // async RegisterSalesPerson(reqData: any) {
-    //     let retVal = null;
-    //     try {
-    //         //
-    //     } catch (e) {
-    //         throw e;
-    //     }
-    //     return retVal;
-    // }
-    // async CheckExistingStockist(reqData: any) {
-    //     let retVal = null;
-    //     try {
-    //         //
-    //     } catch (e) {
-    //         throw e;
-    //     }
-    //     return retVal;
-    // }
-    // async CheckActiveSalesPersons(reqData: any) {
-    //     let retVal = null;
-    //     try {
-    //         //
-    //     } catch (e) {
-    //         throw e;
-    //     }
-    //     return retVal;
-    // }
-    // async CheckActiveLicense(licid: any) {
-    //     let retVal = false;
-    //     try {
-
-    //     } catch (e) {
-    //         throw e;
-    //     }
-    //     return retVal;
-    // }
+                    if (users && users.length > 0) {
+                        if (userid) {
+                            let isValid = false;
+                            let maxusercount = 0;
+                            for (let i = 0; i < users.length; i++) {
+                                if (userid == users[i]) {
+                                    isValid = true;
+                                }
+                                await db.collection(MainDBCollection.Users).findOne({ personid: users[i] }).then(res => {
+                                    if (res) {
+                                        if (res.active == 'Y') {
+                                            maxusercount++;
+                                        }
+                                    }
+                                }).catch(err => {
+                                    throw err;
+                                });
+                            }
+                            if (isValid) {
+                                let active = 'N';
+                                let isAllowed = true;
+                                if (activate) {
+                                    active = 'Y';
+                                    //Check for exixting license and max user count
+                                    if (licid) {
+                                        await db.collection(MainDBCollection.Licenses).findOne({ licid: licid, active: 'Y' }).then(res => {
+                                            if (res) {
+                                                if (maxusercount < res.maxusercount) {
+                                                    isAllowed = true;
+                                                } else {
+                                                    isAllowed = false;
+                                                }
+                                            } else {
+                                                isAllowed = false;
+                                            }
+                                        }).catch(err => {
+                                            throw err;
+                                        });
+                                    }
+                                } else {
+                                    active = 'N';
+                                }
+                                if (isAllowed) {
+                                    await db.collection(MainDBCollection.Users).findOneAndUpdate({ userid: userid, ownerrefid: ownerrefid },
+                                        { $set: { active: active } },
+                                        { sort: { updatedat: 1 }, upsert: true, returnOriginal: false }).then(res => {
+                                        if (res.lastErrorObject) {
+                                            errorCode = 5;
+                                        } else {
+                                            fResult = res.value;
+                                        }
+                                    }).catch(err => {
+                                        throw err;
+                                    });
+                                } else {
+                                    errorCode = 6;
+                                }
+                            }
+                        } else {
+                            errorCode = 4;
+                        }
+                    } else {
+                        errorCode = 3;
+                    }
+                } else {
+                    errorCode = 2;
+                }
+            } else {
+                errorCode = 1;
+            }
+            retVal.ErrorCode = errorCode;
+            switch (errorCode) {
+                case 1:
+                    retVal.Message = 'Owner id is empty.';
+                    break;
+                case 2:
+                    retVal.Message = 'No registration information found.';
+                    break;
+                case 3:
+                    retVal.Message = 'No user is registered yet.';
+                    break;
+                case 4:
+                    retVal.Message = 'User id is not provided.';
+                    break;
+                case 5:
+                    retVal.Message = 'No user is available with this id.';
+                    break;
+                case 6:
+                    retVal.Message = 'User limit reached, license needs to be upgraded.';
+                    break;
+                default:
+                    retVal.Result = fResult;
+                    break;
+            }
+        } catch (e) {
+            throw e;
+        }
+        finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
 }
 
 export let RegistrationDBHandle = new RegistrationDBHandler();

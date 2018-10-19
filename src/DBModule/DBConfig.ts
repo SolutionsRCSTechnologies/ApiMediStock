@@ -31,7 +31,6 @@ export const MainDBCollection = {
     Licenses: "Licenses",
     ActiveSession: "ActiveSession",
     Users: "Users",
-    UserDetail: "UserDetail",
     LicenseTypes: "LicenseTypes",
     Registrations: "Registrations"
 };

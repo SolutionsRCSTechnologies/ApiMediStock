@@ -1,4 +1,5 @@
-import { ObjectID, ObjectId } from 'bson';
+import { ObjectID, ObjectId, Long } from 'bson';
+import { Util } from './UtilHandler';
 
 export class LicenseType {
     private typeid: string;
@@ -133,11 +134,25 @@ export class User {
     private createdby: string;
     private updatedat: Date;
     private updatedby: string;
-    private mobileno: string;
+    private mobileno: Int16Array;
     private usertype: string;
     private licensed: string;
     private ownerrefid: string;
     private emailid: string;
+    private _id: string;
+
+    constructor(isOwner: boolean) {
+        let cusStr: string = 'US';
+        if (isOwner) {
+            cusStr = 'UO';
+        }
+        Util.GetCustomGuidStr(cusStr).then(val => {
+            if (val) {
+                this.personid = val;
+                this._id = val;
+            }
+        })
+    }
 
     public get EmailId(): string {
         return this.emailid;
@@ -163,7 +178,7 @@ export class User {
     public set UserType(val) {
         this.usertype = val;
     }
-    public get MobileNo(): string {
+    public get MobileNo(): Int16Array {
         return this.mobileno;
     }
     public set MobileNo(val) {
@@ -172,9 +187,9 @@ export class User {
     public get PersonId(): string {
         return this.personid;
     }
-    public set PersonId(val) {
-        this.personid = val;
-    }
+    // public set PersonId(val) {
+    //     this.personid = val;
+    // }
     public get FirstName(): string {
         return this.firstname;
     }
@@ -250,8 +265,8 @@ export class RegistrationDetail {
     private ownerfirstname: string;
     private ownerlastname: string;
     private ownermiddlename: string;
-    private maxusercount: number;
-    private mobileno: number;
+    private maxusercount: Long;
+    private mobileno: Int16Array;
     private country: string;
     private address: string;
     private druglicense: string;
@@ -261,7 +276,52 @@ export class RegistrationDetail {
     private shopnumber: string;
     private ownerrefid: string;
     private emailid: string;
+    private _id: string;
+    private createdat: Date;
+    private createdby: string;
+    private updatedat: Date;
+    private updatedby: string;
+    private licensed: string;
 
+    constructor() {
+        Util.GetCustomGuidStr('REG').then(val => {
+            if (val) {
+                this.regid = val;
+                this._id = val;
+            }
+        })
+    }
+
+    public get Licensed(): string {
+        return this.licensed;
+    }
+    public set Licensed(val) {
+        this.licensed = val;
+    }
+    public get UpdatedAt(): Date {
+        return this.updatedat;
+    }
+    public set UpdatedAt(val) {
+        this.updatedat = val;
+    }
+    public get UpdatedBy(): string {
+        return this.updatedby;
+    }
+    public set UpdatedBy(val) {
+        this.updatedby = val;
+    }
+    public get CreatedAt(): Date {
+        return this.createdat;
+    }
+    public set CreatedAt(val) {
+        this.createdat = val;
+    }
+    public get CreatedBy(): string {
+        return this.createdby;
+    }
+    public set CreatedBy(val) {
+        this.createdby = val;
+    }
     public get EmailId(): string {
         return this.emailid;
     }
@@ -328,13 +388,13 @@ export class RegistrationDetail {
     public set OwnerMiddleName(val) {
         this.ownermiddlename = val;
     }
-    public get MaxUserCount(): number {
+    public get MaxUserCount(): Long {
         return this.maxusercount;
     }
     public set MaxUserCount(val) {
         this.maxusercount = val;
     }
-    public get MobileNo(): number {
+    public get MobileNo(): Int16Array {
         return this.mobileno;
     }
     public set MobileNo(val) {
@@ -361,7 +421,19 @@ export class RegistrationDetail {
     public get RegId(): string {
         return this.regid;
     }
-    public set RegId(val) {
-        this.regid = val;
-    }
+    // public set RegId(val) {
+    //     this.regid = val;
+    // }
+}
+
+export class ActiveSession {
+    private userid: string;
+    private sessionid: string;
+    private starttime: Date;
+    private endtime: Date;
+    private userdb: string;
+    private createdat: Date;
+    private updatedat: Date;
+    private createdby: string;
+    private updatedby: string;
 }
