@@ -1,13 +1,241 @@
 import { MongoClient, Db } from 'mongodb';
 import { Guid } from 'guid-typescript';
 
-import { DBConfig } from '../../../DBModule/DBConfig';
+import { DBConfig, MainDBCollection } from '../../../DBModule/DBConfig';
 import { DBClient } from '../../../DBModule/DBClient';
-import { DBConfigEntity } from '../../../CommonModule/Entities';
+import { DBConfigEntity, MethodResponse } from '../../../CommonModule/Entities';
+import { LoginUtilHandle } from './LoginUtilHandler';
+import { isDate } from 'util';
+import { ActiveSession } from '../../../CommonModule/DBEntities';
 
 class LoginDBHandler {
 
 
+    async ValidateLogin(req) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        let errorCode = 0;
+        let result: ActiveSession = null;
+        try {
+            if (req && req.userid && req.password) {
+                let userid = req.userid;
+                let password = req.password;
+                let isActiveSession = false;
+                let config = DBConfig;
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                await db.collection(MainDBCollection.ActiveSession).findOne({ userid: userid }, { sort: { endtime: -1 } }).then(async res => {
+                    let response = await res;
+                    if (response) {
+                        let timestamp = new Date();
+                        let elapsedtime = isDate(response.endtime) ? response.endtime : new Date().setFullYear(2000, 1, 1);
+                        if (timestamp < elapsedtime) {
+                            result = await LoginUtilHandle.GetActiveSession(response);
+                            isActiveSession = true;
+                        } else {
+                            isActiveSession = false;
+                        }
+                    }
+                }).catch(err => {
+                    throw err;
+                });
+                if (!isActiveSession) {
+                    let ownerrefid = null;
+                    let personid = null;
+                    result = new ActiveSession();
+                    await db.collection(MainDBCollection.Users).findOne({ userid: userid, active: 'Y' }).then(res => {
+                        if (res) {
+                            personid = res.personid;
+                            ownerrefid = res.ownerrefid;
+                            result.UserId = res.userid;
+                            result.UserType = res.usertype;
+                            result.UserName = res.firstname + " " + res.lastname;
+                        } else {
+                            errorCode = 2;
+                        }
+                    }).catch(err => {
+                        throw err;
+                    });
+                    if (ownerrefid) {
+                        let isExistingUser = false;
+                        await db.collection(MainDBCollection.Registrations).findOne({ ownerrefid: ownerrefid, active: 'Y', licensed: 'Y' }).then(res => {
+                            if (res) {
+                                if (res.users && res.users.length > 0) {
+                                    for (let i = 0; i < res.users.length; i++) {
+                                        if (personid == res.users[i]) {
+                                            isExistingUser = true;
+                                        }
+                                    }
+                                    if (isExistingUser) {
+                                        result.UserDB = res.userdbname;
+                                    } else {
+                                        errorCode = 7;
+                                    }
+                                } else {
+                                    errorCode = 6;
+                                }
+                            } else {
+                                errorCode = 5;
+                            }
+                        }).catch(err => {
+                            throw err;
+                        });
+                        //TBD: Check for active license
+                        if (isExistingUser && result && result.UserId) {
+                            result.StartTime = new Date();
+                            result.EndTime = new Date();
+                            result.EndTime.setHours(4);
+                            result.CreatedAt = new Date();
+                            result.UpdatedAt = new Date();
+                            await db.collection(MainDBCollection.ActiveSession).insertOne(result).then(res => {
+                                if (!(res && res.insertedCount > 0)) {
+                                    errorCode = 8;
+                                }
+                            }).catch(err => {
+                                throw err;
+                            });
+                        } else {
+                            errorCode = 10;
+                        }
+                    } else {
+                        //Owner not found
+                        errorCode = 9;
+                    }
+                } else {
+                    let elapsedTime = new Date();
+                    let sessionid = null;
+                    let userid = null;
+                    if (result && result.SessionId && result.UserId) {
+                        sessionid = result.SessionId;
+                        userid = result.UserId;
+                        elapsedTime.setHours(4);
+                        await db.collection(MainDBCollection.ActiveSession).findOneAndUpdate({ sessionid: sessionid, userid: userid }, { $set: { endtime: new Date(), updatedat: new Date(), updatedby: 'SYSTEM' } }, { upsert: true }).then(res => {
+                            if (res && res.lastErrorObject) {
+                                errorCode = 4;
+                            }
+                        }).catch(err => {
+                            throw err;
+                        });
+                    } else {
+                        result = null;
+                        errorCode = 3;
+                    }
+                }
+            } else {
+                errorCode = 1;
+            }
+            retVal.ErrorCode = errorCode;
+            switch (errorCode) {
+                case 1:
+                    retVal.Message = 'Request is not valid.';
+                    break;
+                case 2:
+                    retVal.Message = 'User not found.';
+                    break;
+                case 3:
+                    retVal.Message = 'Already has an active session but currently not found.';
+                    break;
+                case 4:
+                    retVal.Message = 'Already has an active session, cannot update currently.';
+                    break;
+                case 5:
+                    retVal.Message = 'No registration information found.';
+                    break;
+                case 6:
+                    retVal.Message = 'User is not registered.';
+                    break;
+                case 7:
+                    retVal.Message = 'User is not registered, request owner to add user.';
+                    break;
+                case 8:
+                    retVal.Message = 'Error occured during login.';
+                    break;
+                case 9:
+                    retVal.Message = 'Owner not found, an owner needs to be assigned.';
+                    break;
+                case 10:
+                    retVal.Message = 'User not found with valid registration.';
+                    break;
+                default:
+                    retVal.Result = {
+                        userid: result.UserId,
+                        username: result.UserName,
+                        sessionid: result.SessionId,
+                        type: result.UserType
+                    };
+                    break;
+            }
+        } catch (e) {
+            throw e;
+        }
+        finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
+
+    async ValidateHeader(header) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient;
+        let errorCode: number = 0;
+        try {
+            let result = null;
+            let config = DBConfig;
+            mClient = await DBClient.GetMongoClient(config);
+            let db: Db = await mClient.db(config.MainDBName);
+            let sessionid = null;
+            if (header && header.sessionid) {
+                sessionid = header.sessionid;
+            }
+            if (sessionid) {
+                await db.collection(MainDBCollection.ActiveSession).findOne({ sessionid: sessionid }).then(res => {
+                    if (res) {
+                        let currenttime = Date.parse(new Date().toString());
+                        let endtime = 0;
+                        if (isDate(res.endtime)) {
+                            endtime = Date.parse(res.endtime.toString());
+                        }
+                        if (endtime && currenttime < endtime) {
+                            result = res;
+                        } else {
+                            errorCode = 3;
+                        }
+                    } else {
+                        errorCode = 2;
+                    }
+                }).catch(err => {
+                    throw err;
+                });
+            } else {
+                errorCode = 1;
+            }
+            retVal.ErrorCode = errorCode;
+            switch (errorCode) {
+                case 1:
+                    retVal.Message = 'Header is not valid, it does not contain any session id.';
+                    break;
+                case 2:
+                    retVal.Message = 'No active session found.';
+                    break;
+                case 3:
+                    retVal.Message = 'Session timeout, login again.';
+                    break;
+                default:
+                    retVal.Result = result;
+                    break;
+            }
+        } catch (e) {
+            throw e;
+        }
+        finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
 
     async Login(userName: string, password: string) {
         let retVal = null;

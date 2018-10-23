@@ -17,8 +17,8 @@ class Utilies {
         res.write(JSON.stringify(err));
     }
 
-    async GetCustomGuidStr(initialStr?: string, timestamp?: Date) {
-        let gid: string = (initialStr ? initialStr.trim() : '') + Guid.raw() + (timestamp ? timestamp.toString() : '');
+    async GetCustomGuidStr(initialStr?: string, endStr?: string) {
+        let gid: string = (initialStr ? initialStr.trim() : '') + Guid.raw() + (endStr ? endStr.trim() : '');
         return gid;
     }
     async GetGuidStr() {

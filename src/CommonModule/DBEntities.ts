@@ -1,4 +1,4 @@
-import { ObjectID, ObjectId, Long } from 'bson';
+import { Long } from 'bson';
 import { Util } from './UtilHandler';
 
 export class LicenseType {
@@ -282,6 +282,7 @@ export class RegistrationDetail {
     private updatedat: Date;
     private updatedby: string;
     private licensed: string;
+    private userdbname: string;
 
     constructor() {
         Util.GetCustomGuidStr('REG').then(val => {
@@ -292,6 +293,12 @@ export class RegistrationDetail {
         })
     }
 
+    public get UserDBName(): string {
+        return this.userdbname;
+    }
+    public set UserDBName(val) {
+        this.userdbname = val;
+    }
     public get Licensed(): string {
         return this.licensed;
     }
@@ -436,4 +443,84 @@ export class ActiveSession {
     private updatedat: Date;
     private createdby: string;
     private updatedby: string;
+    private usertype: string;
+    private _id: string;
+    private username: string;
+
+    constructor() {
+        let timestr = new Date().toTimeString();
+        Util.GetCustomGuidStr('SESSION', timestr).then(str => {
+            this._id = str;
+        }).catch(err => {
+            throw err;
+        });
+    }
+
+    public get UserName(): string {
+        return this.username;
+    }
+    public set UserName(val) {
+        this.username = val;
+    }
+    public get UserType(): string {
+        return this.usertype;
+    }
+    public set UserType(val) {
+        this.usertype = val;
+    }
+    public get UpdatedBy(): string {
+        return this.updatedby;
+    }
+    public set UpdatedBy(val) {
+        this.updatedby = val;
+    }
+    public get UserDB(): string {
+        return this.userdb;
+    }
+    public set UserDB(val) {
+        this.userdb = val;
+    }
+    public get CreatedBy(): string {
+        return this.createdby;
+    }
+    public set CreatedBy(val) {
+        this.createdby = val;
+    }
+    public get CreatedAt(): Date {
+        return this.createdat;
+    }
+    public set CreatedAt(val) {
+        this.createdat = val;
+    }
+    public get UpdatedAt(): Date {
+        return this.updatedat;
+    }
+    public set UpdatedAt(val) {
+        this.updatedat = val;
+    }
+    public get UserId(): string {
+        return this.userid;
+    }
+    public set UserId(val) {
+        this.userid = val;
+    }
+    public get SessionId(): string {
+        return this.sessionid;
+    }
+    public set SessionId(val) {
+        this.sessionid = val;
+    }
+    public get StartTime(): Date {
+        return this.starttime;
+    }
+    public set StartTime(val) {
+        this.starttime = val;
+    }
+    public get EndTime(): Date {
+        return this.endtime;
+    }
+    public set EndTime(val) {
+        this.endtime = val;
+    }
+
 }
