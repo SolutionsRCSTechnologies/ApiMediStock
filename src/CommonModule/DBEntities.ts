@@ -446,16 +446,32 @@ export class ActiveSession {
     private usertype: string;
     private _id: string;
     private username: string;
+    private ownerrefid: string;
+    private active: string;
 
     constructor() {
         let timestr = new Date().toTimeString();
         Util.GetCustomGuidStr('SESSION', timestr).then(str => {
             this._id = str;
+            this.sessionid = str;
+            this.active = 'Y';
         }).catch(err => {
             throw err;
         });
     }
 
+    public get Active(): string {
+        return this.active;
+    }
+    // public set Active(val) {
+    //     this.active = val;
+    // }
+    public get OwnerRefId(): string {
+        return this.ownerrefid;
+    }
+    public set OwnerRefId(val) {
+        this.ownerrefid = val;
+    }
     public get UserName(): string {
         return this.username;
     }
@@ -507,9 +523,9 @@ export class ActiveSession {
     public get SessionId(): string {
         return this.sessionid;
     }
-    public set SessionId(val) {
-        this.sessionid = val;
-    }
+    // public set SessionId(val) {
+    //     this.sessionid = val;
+    // }
     public get StartTime(): Date {
         return this.starttime;
     }

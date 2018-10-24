@@ -402,7 +402,7 @@ class RegistrationDBHandler {
                             }
                             if (isValid) {
                                 let active = 'N';
-                                let isAllowed = true;
+                                let isAllowed = false;
                                 if (activate) {
                                     active = 'Y';
                                     //Check for exixting license and max user count
@@ -428,14 +428,14 @@ class RegistrationDBHandler {
                                     await db.collection(MainDBCollection.Users).findOneAndUpdate({ userid: userid, ownerrefid: ownerrefid },
                                         { $set: { active: active } },
                                         { sort: { updatedat: 1 }, upsert: true, returnOriginal: false }).then(res => {
-                                        if (res.lastErrorObject) {
-                                            errorCode = 5;
-                                        } else {
-                                            fResult = res.value;
-                                        }
-                                    }).catch(err => {
-                                        throw err;
-                                    });
+                                            if (res.lastErrorObject) {
+                                                errorCode = 5;
+                                            } else {
+                                                fResult = res.value;
+                                            }
+                                        }).catch(err => {
+                                            throw err;
+                                        });
                                 } else {
                                     errorCode = 6;
                                 }
