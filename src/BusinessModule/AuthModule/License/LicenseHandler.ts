@@ -1,4 +1,5 @@
 import { LicenseOpHandle } from './LicenseOperation';
+import { MethodResponse } from '../../../CommonModule/Entities';
 
 class LicenseHandler {
     async ValidateLicense(licid: string) {
@@ -14,7 +15,13 @@ class LicenseHandler {
     }
 
     async RegisterLicense(req: any) {
-        // 
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            retVal = await LicenseOpHandle.RegisterLicense(req);
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
     }
 }
 

@@ -283,6 +283,7 @@ export class RegistrationDetail {
     private updatedby: string;
     private licensed: string;
     private userdbname: string;
+    private createcollectionstat: string;
 
     constructor() {
         Util.GetCustomGuidStr('REG').then(val => {
@@ -290,9 +291,17 @@ export class RegistrationDetail {
                 this.regid = val;
                 this._id = val;
             }
-        })
+        }).catch(err => {
+            throw err;
+        });
     }
 
+    public get CreateCollectionStat(): string {
+        return this.createcollectionstat;
+    }
+    public set CreateCollectionStat(val) {
+        this.createcollectionstat = val;
+    }
     public get UserDBName(): string {
         return this.userdbname;
     }
@@ -523,9 +532,9 @@ export class ActiveSession {
     public get SessionId(): string {
         return this.sessionid;
     }
-    // public set SessionId(val) {
-    //     this.sessionid = val;
-    // }
+    public set SessionId(val) {
+        this.sessionid = val;
+    }
     public get StartTime(): Date {
         return this.starttime;
     }

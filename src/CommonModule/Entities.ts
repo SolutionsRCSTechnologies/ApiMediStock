@@ -6,9 +6,14 @@ export class DBConfigEntity {
     private _UserDBName: string = "";
     private _UserDBUrl: string = "";
 
-    constructor(_mainDBName: string, _mainDBUrl: string) {
+    constructor(_mainDBName: string, _mainDBUrl: string, _userDBUrl?: string) {
         this._MainDBName = _mainDBName;
         this._MainDBUrl = _mainDBUrl;
+        if (_userDBUrl && _userDBUrl.length > 0) {
+            this._UserDBUrl = _userDBUrl;
+        } else {
+            this._UserDBUrl = this._MainDBUrl;
+        }
     }
 
 

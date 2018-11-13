@@ -486,6 +486,115 @@ class RegistrationDBHandler {
         }
         return retVal;
     }
+
+    async UpdateStatus(ownerid: string, licid: string, stat: string) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        try {
+            if (ownerid && licid && ownerid.length > 0 && licid.length > 0) {
+                let status: string = 'N';
+                switch (stat) {
+                    case 'S':
+                    case 'Y':
+                    case 'P':
+                        status = stat;
+                        break;
+                    default:
+                        status = 'N';
+                        break;
+                }
+                let config = DBConfig;
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                retVal.Result = false;
+                await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerid, licid: licid, active: 'Y', licensed: 'Y' },
+                    { $set: { createcollectionstat: status } }).then(res => {
+                        if (res && res.value) {
+                            console.log('Status updated');
+                            retVal.Result = true;
+                        }
+                    }).catch(err => {
+                        throw err;
+                    });
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Information is not present.';
+            }
+        } catch (e) {
+            throw e;
+        } finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
+
+    async UpdateUserDBName(ownerid: string, licid: string, dbName: string) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        try {
+            if (ownerid && licid && dbName && ownerid.length > 0 && licid.length > 0 && dbName.length > 0) {
+                let config = DBConfig;
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerid, licid: licid, active: 'Y', licensed: 'Y' },
+                    { $set: { userdbname: dbName } }).then(res => {
+                        if (res && res.value) {
+                            console.log('Status updated');
+                        }
+                    }).catch(err => {
+                        throw err;
+                    });
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Provided information is not correct.';
+            }
+        } catch (e) {
+            throw e;
+        } finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
+
+    async UpdateLicenseStatus(ownerid: string, licid: string, isLicensed: boolean) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        try {
+            if (ownerid && licid && ownerid.length > 0 && licid.length > 0) {
+                let status: string = 'N';
+                if (isLicensed) {
+                    status = 'Y';
+                }
+                let config = DBConfig;
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                retVal.Result = false;
+                await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerid, licid: licid, active: 'Y' },
+                    { $set: { licensed: status } }).then(res => {
+                        if (res && res.value) {
+                            console.log('Status updated');
+                            retVal.Result = true;
+                        }
+                    }).catch(err => {
+                        throw err;
+                    });
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Information is not present.';
+            }
+        } catch (e) {
+            throw e;
+        } finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
 }
 
 export let RegistrationDBHandle = new RegistrationDBHandler();

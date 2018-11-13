@@ -270,6 +270,79 @@ class RegistrationOperations {
         }
         return retVal;
     }
+
+    async UpdateUserDBName(ownerId: string, licId: string, userDBName: string) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (ownerId && licId && ownerId.length > 0 && licId.length > 0) {
+                if (userDBName && userDBName.length > 0) {
+                    retVal = await RegistrationDBHandle.UpdateUserDBName(ownerId, licId, userDBName);
+                } else {
+                    retVal.ErrorCode = 2;
+                    retVal.Message = 'User DataBase name is empty.';
+                }
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Owner id or License id is empty.';
+            }
+        } catch (e) {
+            console.log(e);
+            throw e;
+        }
+        return retVal;
+    }
+
+    async UpdateLicenseStatus(ownerId: string, licId: string, isLicensed: boolean) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (ownerId && licId && ownerId.length > 0 && licId.length > 0) {
+                retVal = await RegistrationDBHandle.UpdateLicenseStatus(ownerId, licId, isLicensed);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Owner id or License id is empty.';
+            }
+        } catch (e) {
+            console.log(e);
+            throw e;
+        }
+        return retVal;
+    }
+
+    async UpdateCollectionCreationStatus(ownerId: string, licid: string, status: string) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (ownerId && licid && ownerId.length > 0 && licid.length > 0) {
+                if (status && status.length > 0) {
+                    let stat: string = '';
+                    switch (status.toUpperCase()) {
+                        case 'START':
+                            stat = 'S';
+                            break;
+                        case 'PENDING':
+                            stat = 'N';
+                            break;
+                        case 'PROGRESS':
+                            stat = 'P';
+                            break;
+                        case 'DONE':
+                            stat = 'Y';
+                            break;
+                    }
+                    retVal = await RegistrationDBHandle.UpdateStatus(ownerId, licid, stat);
+                } else {
+                    retVal.ErrorCode = 2;
+                    retVal.Message = 'User DataBase name is empty.';
+                }
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Owner id or License id is empty.';
+            }
+        } catch (e) {
+            console.log(e);
+            throw e;
+        }
+        return retVal;
+    }
 }
 
 export let RegistrationOpHandle = new RegistrationOperations();
