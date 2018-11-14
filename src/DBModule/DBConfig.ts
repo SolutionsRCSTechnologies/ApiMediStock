@@ -16,7 +16,7 @@ class DataBaseConfig {
 export let DBConfig = new DataBaseConfig().DBConfig;
 
 export const UserDBCollection = {
-    ActiveSession: "ActiveSession",
+    //ActiveSession: "ActiveSession",
     OrderDetail: "OrderDetail",
     OrderArchive: "OrderArchive",
     Notifications: "Notifications",
@@ -24,7 +24,8 @@ export const UserDBCollection = {
     Products: "Products",
     Retailers: "Retailers",
     RetaileTransactions: "RetailTransactions",
-    ProductsArchive: "ProductsArchive"
+    ProductsArchive: "ProductsArchive",
+    CollectionsStatus: "CollectionsStatus"
 };
 
 export const MainDBCollection = {
@@ -32,5 +33,19 @@ export const MainDBCollection = {
     ActiveSession: "ActiveSession",
     Users: "Users",
     LicenseTypes: "LicenseTypes",
-    Registrations: "Registrations"
+    Registrations: "Registrations",
+    PaymentDetails: "PaymentDetails",
+    LicensePurchase: "LicensePurchase"
 };
+
+export const UserDBCollectionArr = [
+    "CollectionsStatus",
+    "ProductsArchive",
+    "RetailTransactions",
+    "Retailers",
+    "Products",
+    "Notifications",
+    "SessionArchive",
+    "OrderArchive",
+    "OrderDetail"
+];

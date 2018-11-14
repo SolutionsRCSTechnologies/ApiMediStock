@@ -283,6 +283,7 @@ export class RegistrationDetail {
     private updatedby: string;
     private licensed: string;
     private userdbname: string;
+    private userdburl: string;
     private createcollectionstat: string;
 
     constructor() {
@@ -307,6 +308,12 @@ export class RegistrationDetail {
     }
     public set UserDBName(val) {
         this.userdbname = val;
+    }
+    public get UserDBUrl(): string {
+        return this.userdburl;
+    }
+    public set UserDBUrl(val) {
+        this.userdburl = val;
     }
     public get Licensed(): string {
         return this.licensed;
@@ -448,6 +455,7 @@ export class ActiveSession {
     private starttime: Date;
     private endtime: Date;
     private userdb: string;
+    private userdburl: string;
     private createdat: Date;
     private updatedat: Date;
     private createdby: string;
@@ -504,6 +512,12 @@ export class ActiveSession {
     }
     public set UserDB(val) {
         this.userdb = val;
+    }
+    public get UserDBUrl(): string {
+        return this.userdburl;
+    }
+    public set UserDBUrl(val) {
+        this.userdburl = val;
     }
     public get CreatedBy(): string {
         return this.createdby;

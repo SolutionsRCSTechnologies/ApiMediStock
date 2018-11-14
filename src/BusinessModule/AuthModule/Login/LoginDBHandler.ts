@@ -74,6 +74,7 @@ class LoginDBHandler {
                                     }
                                     if (isExistingUser) {
                                         result.UserDB = res.userdbname;
+                                        result.UserDBUrl = res.userdburl;
                                     } else {
                                         errorCode = 7;
                                     }

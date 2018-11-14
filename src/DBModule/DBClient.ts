@@ -7,6 +7,10 @@ class DBClientAccess {
         return await MongoClient.connect(config.MainDBUrl, { useNewUrlParser: true });
     }
 
+    async GetUserDBMongoClient(config: DBConfigEntity, isUserDB: boolean) {
+        return await MongoClient.connect((isUserDB ? config.UserDBUrl : config.MainDBUrl), { useNewUrlParser: true });
+    }
+
     async CreateUserDB(url: string) {
         let isCreated: boolean = false;
         let mClient: MongoClient = null;

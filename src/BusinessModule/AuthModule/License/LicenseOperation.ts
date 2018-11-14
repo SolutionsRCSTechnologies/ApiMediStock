@@ -40,28 +40,14 @@ class LicenseOpHandler {
         return isValid;
     }
 
-    async RegisterLicense(req: any) {
+    async CreateUserCollections(ownerId: string, licId: string) {
         let retVal: MethodResponse = new MethodResponse();
-        let output: MethodResponse = new MethodResponse();
         try {
-            let isValid: boolean = await this.ValidateLicRegistrationReq(req);
-            if (isValid) {
-                //Check for existing Registration and DataBase
-                //Check for existing License if any
-                let licId: string = '';
-                //Create or update license table
-                let isExist: boolean = false;
-                //Check for exiting USERDB
-                //Update payment information (Create payment table entry during registration)
-                output = await RegistrationOpHandle.UpdateLicenseStatus(req.ownerid, licId, true);
-                if (isExist) {
-                    //Extend existing registraion information
-                } else {
-                    let isProcessDone: boolean = await this.CreateUserDB(req.ownerid, licId);
-                }
+            if (ownerId && licId && ownerId.length > 0 && licId.length > 0) {
+                retVal = await LicenseDBHandle.CreateCollections(ownerId, licId);
             } else {
                 retVal.ErrorCode = 1;
-                retVal.Message = 'License registration request is not valid.';
+                retVal.Message = 'Ownerid or License id or both are missing.';
             }
         } catch (e) {
             throw e;
@@ -99,6 +85,7 @@ class LicenseOpHandler {
                     output = await RegistrationOpHandle.UpdateUserDBName(userName, licId, dbName);
                     output = await RegistrationOpHandle.UpdateCollectionCreationStatus(userName, licId, 'START');
                     //Create userDB collections creation.
+                    output = await LicenseDBHandle.CreateCollections(userName, licId);
                     //Set collection creation completed as true.
                     output = await RegistrationOpHandle.UpdateCollectionCreationStatus(userName, licId, 'DONE');
                     isProcessDone = true;
@@ -109,6 +96,37 @@ class LicenseOpHandler {
         }
         return isProcessDone;
     }
+
+    async RegisterLicense(req: any) {
+        let retVal: MethodResponse = new MethodResponse();
+        let output: MethodResponse = new MethodResponse();
+        try {
+            let isValid: boolean = await this.ValidateLicRegistrationReq(req);
+            if (isValid) {
+                //Check for existing Registration and DataBase
+                //Check for existing License if any
+                let licId: string = '';
+                //Create or update license table
+                let isExist: boolean = false;
+                //Check for exiting USERDB
+                //Update payment information (Create payment table entry during registration)
+                output = await RegistrationOpHandle.UpdateLicenseStatus(req.ownerid, licId, true);
+                if (isExist) {
+                    //Extend existing registraion information
+                } else {
+                    let isProcessDone: boolean = await this.CreateUserDB(req.ownerid, licId);
+                }
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'License registration request is not valid.';
+            }
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
+
+
 }
 
 export let LicenseOpHandle = new LicenseOpHandler();
