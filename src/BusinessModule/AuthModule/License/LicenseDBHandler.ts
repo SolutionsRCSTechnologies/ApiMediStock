@@ -127,6 +127,56 @@ class LicenseDBHandler {
         }
         return retVal;
     }
+
+    async CheckExistingLicense(licId: string) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        let result: any = null;
+        let errorCode: number = 0;
+        try {
+            if (licId && licId.length > 0) {
+                let config = DBConfig;
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                await db.collection(MainDBCollection.Licenses).findOne({ licid: licId, active: 'Y' }).then(res => {
+                    if (res) {
+                        result = {
+                            licid: res.licid,
+                            lictype: res.lictype,
+                            expiredate: res.expiredt,
+                            subscriptiontype: res.subscriptiontype,
+                            ownerid: res.ownerid
+                        };
+                    } else {
+                        errorCode = 2;
+                    }
+                }).catch(err => {
+                    throw err;
+                });
+            } else {
+                errorCode = 1;
+            }
+            retVal.ErrorCode = errorCode;
+            switch (errorCode) {
+                case 1:
+                    retVal.Message = 'License id is empty.';
+                    break;
+                case 2:
+                    retVal.Message = 'No active license available.';
+                    break;
+                default:
+                    retVal.Result = result;
+                    break;
+            }
+        } catch (e) {
+            throw e;
+        } finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
 }
 
 export let LicenseDBHandle = new LicenseDBHandler();

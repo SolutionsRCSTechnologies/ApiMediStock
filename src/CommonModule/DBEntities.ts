@@ -1,4 +1,4 @@
-import { Long } from 'bson';
+import { Long, Double } from 'bson';
 import { Util } from './UtilHandler';
 
 export class LicenseType {
@@ -27,20 +27,39 @@ export class LicenseType {
 }
 
 export class LicenseDetail {
+    private _id: string;
     private licid: string;
     private lictype: string;
     private ownerid: string;
     private maxuser: number;
     private userdb: string;
     private userdburl: string;
-    private licstartdate: Date;
-    private licenddate: Date;
+    private licstartdate: Date = new Date();
+    private licenddate: Date = new Date();
+    private licpurcrefid: string;
     private active: string;
-    private createdat: Date;
+    private createdat: Date = new Date();
     private createdby: string;
-    private updatedat: Date;
+    private updatedat: Date = new Date();
     private updatedby: string;
 
+    constructor() {
+        Util.GetCustomGuidStr("LIC").then(res => {
+            if (res) {
+                this._id = res;
+                this.licid = res;
+            }
+        }).catch(err => {
+            throw err;
+        });
+    }
+
+    public get LicPurchaseRefId(): string {
+        return this.licpurcrefid;
+    }
+    public set LicPurchaseRefId(val) {
+        this.licpurcrefid = val;
+    }
     public get OwnerId(): string {
         return this.ownerid;
     }
@@ -118,6 +137,66 @@ export class LicenseDetail {
     }
     public set LicId(val) {
         this.licid = val;
+    }
+}
+
+export class LicensePurchase {
+    private _id: string;
+    private licpurid: string;
+    private licid: string;
+    private subscriptiontype: string;
+    private subscriptionlength: Long;
+    private lictype: string;
+    private paymentoption: string;
+    private monthlyprice: Double;
+    private yearlyprice: Double;
+    private monthlypayableprice: Double;
+    private yearlypayableprice: Double;
+    private discountpercentage: Double = 0.0;
+    private discountamount: Double = 0.0;
+    private applydiscountpercentage: string = 'N';
+    private applydiscountamount: string = 'N';
+    private lastpaymentamount: Double = 0.0;
+    private lastpaymentdt: Date = new Date(2000, 1, 1);
+    private totalpaidamount: Double = 0.0;
+    private totalpendingamount: Double;
+    private currentpendingmonthlyamount: Double = 0.0;
+    private currentpendingyearlyamount: Double = 0.0;
+    private missedpaymentcyclecount: number = 0;
+    private ownerid: string;
+    private createdat: Date = new Date();
+    private updatedat: Date = new Date();
+    private createdby: string = 'SYSTEM';
+    private updatedby: string = 'SYSTEM';
+
+    constructor(licId?: string, licType?: string) {
+        Util.GetCustomGuidStr("LICPURC").then(res => {
+            if (res) {
+                this._id = res;
+                this.licpurid = res;
+            }
+        }).catch(err => {
+            throw err;
+        });
+        if (licId && licId.length > 0) {
+            this.licid = licId;
+        }
+        if (licType && licType.length > 0) {
+            this.lictype = licType;
+        }
+    }
+
+    private get LicId(): string {
+        return this.licid;
+    }
+    private set LicId(val) {
+        this.licid = val;
+    }
+    private get SubscriptionType(): string {
+        return this.subscriptiontype;
+    }
+    private set SubscriptionType(val) {
+        this.subscriptiontype = val;
     }
 }
 

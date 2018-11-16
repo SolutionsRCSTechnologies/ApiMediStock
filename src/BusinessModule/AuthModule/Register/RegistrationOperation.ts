@@ -5,6 +5,7 @@ import { RegisterUtilHandle } from './RegisterUtilHandler';
 import { ObjectId, ObjectID } from 'bson';
 import { MethodResponse } from '../../../CommonModule/Entities';
 import { parse } from 'path';
+import { triggerAsyncId } from 'async_hooks';
 
 class RegistrationOperations {
 
@@ -340,6 +341,21 @@ class RegistrationOperations {
         } catch (e) {
             console.log(e);
             throw e;
+        }
+        return retVal;
+    }
+
+    async GetOwnerRegistrationInfo(ownerId: string) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (ownerId && ownerId.length > 0) {
+                retVal = await RegistrationDBHandle.GetOwnerRegistrationInfo(ownerId);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Empty owner id.';
+            }
+        } catch (e) {
+
         }
         return retVal;
     }

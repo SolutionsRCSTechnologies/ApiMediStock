@@ -3,6 +3,7 @@ import { LicenseType } from "./../../../CommonModule/DBEntities";
 import { MethodResponse } from '../../../CommonModule/Entities';
 import { Util } from '../../../CommonModule/UtilHandler';
 import { RegistrationOpHandle } from '../Register/RegistrationOperation';
+import { Long } from 'bson';
 
 class LicenseOpHandler {
 
@@ -21,7 +22,11 @@ class LicenseOpHandler {
             if (!(req.ownerid && req.ownerid.length > 0)) {
                 retVal = false;
             }
-
+            if (req.paymentdetail) {
+                if (!(req.paidamount && req.paidamount > 0)) {
+                    retVal = false;
+                }
+            }
         } else {
             retVal = false;
         }
@@ -104,8 +109,27 @@ class LicenseOpHandler {
             let isValid: boolean = await this.ValidateLicRegistrationReq(req);
             if (isValid) {
                 //Check for existing Registration and DataBase
-                //Check for existing License if any
                 let licId: string = '';
+                let isLicensed: boolean = false;
+                let maxusercount: number = 0;
+                output = await RegistrationOpHandle.GetOwnerRegistrationInfo(req.ownerid);
+                if (output && output.Result) {
+                    licId = output.Result.licid;
+                    isLicensed = output.Result.licensed == 'Y';
+                    maxusercount = output.Result.maxusercount;
+                }
+                //Check for existing License if any
+                let isNewLicense: boolean = false;
+                if (licId && licId.length > 0) {
+                    output = await LicenseDBHandle.CheckExistingLicense(licId);
+                    if (output && output.ErrorCode != 0) {
+                        isNewLicense = true;
+                    } else if (output && output.Result) {
+                        //Check for pending amount of existing license if any
+                    }
+                } else {
+                    isNewLicense = true;
+                }
                 //Create or update license table
                 let isExist: boolean = false;
                 //Check for exiting USERDB

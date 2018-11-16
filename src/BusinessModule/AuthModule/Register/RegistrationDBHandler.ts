@@ -595,6 +595,75 @@ class RegistrationDBHandler {
         }
         return retVal;
     }
+
+    async GetOwnerRegistrationInfo(ownerId: string) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        let errorCode: number = 0;
+        let result: any = null;
+        try {
+            if (ownerId && ownerId.length > 0) {
+                let config = DBConfig;
+                let isOwner: boolean = false;
+                let ownerrefid: string = '';
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                await db.collection(MainDBCollection.Users).findOne({ userid: ownerId, usertype: 'OWNER', active: 'Y' }).then(res => {
+                    if (res) {
+                        isOwner = true;
+                        ownerrefid = res.ownerrefid;
+                    } else {
+                        errorCode = 2;
+                    }
+                }).catch(err => {
+                    throw err;
+                });
+                if (isOwner && ownerrefid && ownerrefid.length > 0) {
+                    await db.collection(MainDBCollection.Registrations).findOne({ ownerid: ownerId, ownerrefid: ownerrefid, active: 'Y' }).then(res => {
+                        if (res) {
+                            result = {
+                                ownerid: res.ownerid,
+                                licid: res.licid,
+                                licensed: res.licensed,
+                                emailid: res.emailid,
+                                maxusercount: res.maxusercount
+                            };
+                        } else {
+                            errorCode = 3;
+                        }
+                    }).catch(err => {
+                        throw err;
+                    });
+                } else {
+                    errorCode = 2;
+                }
+            } else {
+                errorCode = 1;
+            }
+            retVal.ErrorCode = errorCode;
+            switch (errorCode) {
+                case 1:
+                    retVal.Message = 'Owner id is empty.';
+                    break;
+                case 2:
+                    retVal.Message = 'Owner not found, provided user is not a owner.';
+                    break;
+                case 3:
+                    retVal.Message = 'There is active registration for this owner.';
+                    break;
+                default:
+                    retVal.Result = result;
+                    break;
+            }
+        } catch (e) {
+            throw e;
+        } finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
 }
 
 export let RegistrationDBHandle = new RegistrationDBHandler();
