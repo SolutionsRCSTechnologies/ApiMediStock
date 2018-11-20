@@ -36,7 +36,7 @@ export class LicenseDetail {
     private userdburl: string;
     private licstartdate: Date = new Date();
     private licenddate: Date = new Date();
-    private licpurcrefid: string;
+    //private licpurcrefid: string;
     private active: string;
     private createdat: Date = new Date();
     private createdby: string;
@@ -54,12 +54,12 @@ export class LicenseDetail {
         });
     }
 
-    public get LicPurchaseRefId(): string {
-        return this.licpurcrefid;
-    }
-    public set LicPurchaseRefId(val) {
-        this.licpurcrefid = val;
-    }
+    // public get LicPurchaseRefId(): string {
+    //     return this.licpurcrefid;
+    // }
+    // public set LicPurchaseRefId(val) {
+    //     this.licpurcrefid = val;
+    // }
     public get OwnerId(): string {
         return this.ownerid;
     }
@@ -159,7 +159,7 @@ export class LicensePurchase {
     private lastpaymentamount: Double = 0.0;
     private lastpaymentdt: Date = new Date(2000, 1, 1);
     private totalpaidamount: Double = 0.0;
-    private totalpendingamount: Double;
+    private totalpendingamount: Double = 0.0;
     private currentpendingmonthlyamount: Double = 0.0;
     private currentpendingyearlyamount: Double = 0.0;
     private missedpaymentcyclecount: number = 0;
@@ -186,16 +186,154 @@ export class LicensePurchase {
         }
     }
 
-    private get LicId(): string {
+    public get TotalPendingAmount(): Double {
+        return this.totalpendingamount;
+    }
+    public set TotalPendingAmount(val) {
+        this.totalpendingamount = val;
+    }
+    public get CurrentPendingMonthlyAmount(): Double {
+        return this.currentpendingmonthlyamount;
+    }
+    public set CurrentPendingMonthlyAmount(val) {
+        this.currentpendingmonthlyamount = val;
+    }
+    public get CurrentPendingYearlyAmount(): Double {
+        return this.currentpendingyearlyamount;
+    }
+    public set CurrentPendingYearlyAmount(val) {
+        this.currentpendingyearlyamount = val;
+    }
+    public get MissedPaymentCycleCount(): number {
+        return this.missedpaymentcyclecount;
+    }
+    public set MissedPaymentCycleCount(val) {
+        this.missedpaymentcyclecount = val;
+    }
+    public get OwnerId(): string {
+        return this.ownerid;
+    }
+    public set OwnerId(val) {
+        this.ownerid = val;
+    }
+    public get UpdatedBy(): string {
+        return this.updatedby;
+    }
+    public set UpdatedBy(val) {
+        this.updatedby = val;
+    }
+    public get CreatedAt(): Date {
+        return this.createdat;
+    }
+    public set CreatedAt(val) {
+        this.createdat = val;
+    }
+    public get UpdatedAt(): Date {
+        return this.updatedat;
+    }
+    public set UpdatedAt(val) {
+        this.updatedat = val;
+    }
+    public get CreatedBy(): string {
+        return this.createdby;
+    }
+    public set CreatedBy(val) {
+        this.createdby = val;
+    }
+    public get YearlyPayablePrice(): Double {
+        return this.yearlypayableprice;
+    }
+    public set YearlyPayablePrice(val) {
+        this.yearlypayableprice = val;
+    }
+    public get DiscountPercentage(): Double {
+        return this.discountpercentage;
+    }
+    public set DiscountPercentage(val) {
+        this.discountpercentage = val;
+    }
+    public get DiscountAmount(): Double {
+        return this.discountamount;
+    }
+    public set DiscountAmount(val) {
+        this.discountamount = val;
+    }
+    public get ApplyDiscountPercentage(): string {
+        return this.applydiscountpercentage;
+    }
+    public set ApplyDiscountPercentage(val) {
+        this.applydiscountpercentage = val;
+    }
+    public get ApplyDiscountAmount(): string {
+        return this.applydiscountamount;
+    }
+    public set ApplyDiscountAmount(val) {
+        this.applydiscountamount = val;
+    }
+    public get LastPaymentAmount(): Double {
+        return this.lastpaymentamount;
+    }
+    public set LastPaymentAmount(val) {
+        this.lastpaymentamount = val;
+    }
+    public get LastPaymentDt(): Date {
+        return this.lastpaymentdt;
+    }
+    public set LastPaymentDt(val) {
+        this.lastpaymentdt = val;
+    }
+    public get TotalPaidAmount(): Double {
+        return this.totalpaidamount;
+    }
+    public set TotalPaidAmount(val) {
+        this.totalpaidamount = val;
+    }
+    public get MonthlyPayablePrice(): Double {
+        return this.monthlypayableprice;
+    }
+    public set MonthlyPayablePrice(val) {
+        this.monthlypayableprice = val;
+    }
+    public get YearlyPrice(): Double {
+        return this.yearlyprice;
+    }
+    public set YearlyPrice(val) {
+        this.yearlyprice = val;
+    }
+    public get MonthlyPrice(): Double {
+        return this.monthlyprice;
+    }
+    public set MonthlyPrice(val) {
+        this.monthlyprice = val;
+    }
+    public get PaymentOption(): string {
+        return this.paymentoption;
+    }
+    public set PaymentOption(val) {
+        this.paymentoption = val;
+    }
+    public get LicType(): string {
+        return this.lictype;
+    }
+    public set LicType(val) {
+        this.lictype = val;
+    }
+    public get SubscriptionLength(): Long {
+        return this.subscriptionlength;
+    }
+    public set SubscriptionLength(val) {
+        this.subscriptionlength = val;
+    }
+    public get LicId(): string {
         return this.licid;
     }
-    private set LicId(val) {
+    public set LicId(val) {
         this.licid = val;
     }
-    private get SubscriptionType(): string {
+    public get SubscriptionType(): string {
         return this.subscriptiontype;
     }
-    private set SubscriptionType(val) {
+    public set SubscriptionType(val) {
         this.subscriptiontype = val;
     }
 }
