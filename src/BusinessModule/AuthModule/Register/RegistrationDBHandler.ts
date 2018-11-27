@@ -626,7 +626,10 @@ class RegistrationDBHandler {
                                 licid: res.licid,
                                 licensed: res.licensed,
                                 emailid: res.emailid,
-                                maxusercount: res.maxusercount
+                                maxusercount: res.maxusercount,
+                                dbname: res.userdbname,
+                                dburl: res.userdburl,
+                                isdbcreated: res.isdbcreated
                             };
                         } else {
                             errorCode = 3;

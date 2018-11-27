@@ -145,13 +145,13 @@ export class LicensePurchase {
     private licpurid: string;
     private licid: string;
     private subscriptiontype: string;
-    private subscriptionlength: Long;
+    private subscriptionlength: number;
     private lictype: string;
     private paymentoption: string;
     private monthlyprice: Double;
     private yearlyprice: Double;
-    private monthlypayableprice: Double;
-    private yearlypayableprice: Double;
+    //private monthlypayableprice: Double;
+    private totalprice: Double;
     private discountpercentage: Double = 0.0;
     private discountamount: Double = 0.0;
     private applydiscountpercentage: string = 'N';
@@ -168,6 +168,7 @@ export class LicensePurchase {
     private updatedat: Date = new Date();
     private createdby: string = 'SYSTEM';
     private updatedby: string = 'SYSTEM';
+    private active: string = 'Y';
 
     constructor(licId?: string, licType?: string) {
         Util.GetCustomGuidStr("LICPURC").then(res => {
@@ -186,6 +187,15 @@ export class LicensePurchase {
         }
     }
 
+    public get Active(): string {
+        return this.active;
+    }
+    public set Active(val) {
+        this.active = val;
+    }
+    public get LicPurId(): string {
+        return this.licpurid;
+    }
     public get TotalPendingAmount(): Double {
         return this.totalpendingamount;
     }
@@ -240,11 +250,11 @@ export class LicensePurchase {
     public set CreatedBy(val) {
         this.createdby = val;
     }
-    public get YearlyPayablePrice(): Double {
-        return this.yearlypayableprice;
+    public get TotalPrice(): Double {
+        return this.totalprice;
     }
-    public set YearlyPayablePrice(val) {
-        this.yearlypayableprice = val;
+    public set TotalPrice(val) {
+        this.totalprice = val;
     }
     public get DiscountPercentage(): Double {
         return this.discountpercentage;
@@ -288,12 +298,12 @@ export class LicensePurchase {
     public set TotalPaidAmount(val) {
         this.totalpaidamount = val;
     }
-    public get MonthlyPayablePrice(): Double {
-        return this.monthlypayableprice;
-    }
-    public set MonthlyPayablePrice(val) {
-        this.monthlypayableprice = val;
-    }
+    // public get MonthlyPayablePrice(): Double {
+    //     return this.monthlypayableprice;
+    // }
+    // public set MonthlyPayablePrice(val) {
+    //     this.monthlypayableprice = val;
+    // }
     public get YearlyPrice(): Double {
         return this.yearlyprice;
     }
@@ -318,7 +328,7 @@ export class LicensePurchase {
     public set LicType(val) {
         this.lictype = val;
     }
-    public get SubscriptionLength(): Long {
+    public get SubscriptionLength(): number {
         return this.subscriptionlength;
     }
     public set SubscriptionLength(val) {
@@ -501,6 +511,7 @@ export class RegistrationDetail {
     private licensed: string;
     private userdbname: string;
     private userdburl: string;
+    private isdbcreated: string;
     private createcollectionstat: string;
 
     constructor() {
@@ -514,6 +525,12 @@ export class RegistrationDetail {
         });
     }
 
+    public get IsDBCreated(): string {
+        return this.isdbcreated;
+    }
+    public set IsDBCreated(val) {
+        this.isdbcreated = val;
+    }
     public get CreateCollectionStat(): string {
         return this.createcollectionstat;
     }

@@ -6,7 +6,7 @@ import { Util } from '../../../CommonModule/UtilHandler';
 import { RegistrationOpHandle } from '../Register/RegistrationOperation';
 import { Long } from 'bson';
 import { isDate } from 'util';
-import { LicenseDetail } from '../../../CommonModule/DBEntities';
+import { LicenseDetail, LicensePurchase } from '../../../CommonModule/DBEntities';
 
 class LicenseOpHandler {
 
@@ -89,14 +89,16 @@ class LicenseOpHandler {
             if (isValid) {
                 //Check for existing Registration and DataBase
                 let licId: string = '';
-                let licType: string = '';
+                let licType: string = req.lictype;
                 let isLicensed: boolean = false;
                 let maxusercount: number = 0;
+                let isDBExist: boolean = false;
 
                 output = await RegistrationOpHandle.GetOwnerRegistrationInfo(req.ownerid);
                 if (output && output.Result && output.ErrorCode == 0) {
                     licId = output.Result.licid;
                     isLicensed = output.Result.licensed == 'Y';
+                    isDBExist = output.Result.isdbcreated == 'Y';
                     maxusercount = output.Result.maxusercount;
                     //Check for existing License if any
                     let isNewLicense: boolean = false;
@@ -111,8 +113,16 @@ class LicenseOpHandler {
                             let currentDate = new Date();
                             if (result.pendingamount > 0) {
                                 errorCode = 3;
-                            } else if (result.expiredate <= currentDate) {
-                                errorCode = 4;
+                            } else if (result.expiredate >= currentDate) {
+                                let modifyIfAny: boolean = req.modifyifany && req.modifyifany == 'Y';
+                                if (modifyIfAny) {
+                                    //TBD: Inactive existing license
+                                    //isNewLicense = true;
+                                } else {
+                                    errorCode = 4;
+                                }
+                            } else {
+                                isNewLicense = true;
                             }
                         } else {
                             //DB error
@@ -180,29 +190,43 @@ class LicenseOpHandler {
                                     ownerid: req.ownerid,
                                     licstartdate: startDt,
                                     licenddate: endDt,
-                                    substype: subsType
+                                    substype: subsType,
+                                    yearlyprice: typeResult.yearlyprice,
+                                    monthlyprice: typeResult.monthlyprice,
+                                    dailyprice: typeResult.dailyprice,
+                                    duration: duration
                                 };
                                 let licObj: LicenseDetail = await LicenseUtilHandle.GetLicenseInstance(reqObj);
                                 //create new license
                                 output = null;
                                 output = await LicenseDBHandle.CreateNewLicense(licObj);
-                                //TBD: Create a License purchase entry in DataBase
-                                //Create or update license table
-                                let isExist: boolean = false;
-                                //Check for exiting USERDB
-                                //Update payment information (Create payment table entry during registration)
-                                output = await RegistrationOpHandle.UpdateLicenseStatus(req.ownerid, licId, true);
-                                if (isExist) {
-                                    //Extend existing registraion information
+                                if (output && output.ErrorCode == 0 && output.Result && output.Result.length > 0) {
+                                    licId = output.Result;
+                                    //Create a License purchase entry in DataBase
+                                    output = null;
+                                    let licPurchaseObj: LicensePurchase = null;
+                                    licPurchaseObj = await LicenseUtilHandle.GetLicensePurchaseInstance(licId, reqObj);
+                                    //Entry to License Purchase Collection
+                                    output = await LicenseDBHandle.CreateNewLicensePurchase(licPurchaseObj);
+                                    //Update payment information (Create payment table entry during registration)
+                                    if (isDBExist) {
+                                        //Extend existing registraion information
+                                        //TBD: update license id in existing registration info
+                                        output = await RegistrationOpHandle.UpdateLicenseStatus(req.ownerid, licId, true);
+                                    } else {
+                                        output = await RegistrationOpHandle.UpdateLicenseStatus(req.ownerid, licId, true);
+                                        let isProcessDone: boolean = await this.CreateUserDB(req.ownerid, licId);
+                                        //TBD: Update DB creation in registration detail collection.
+                                    }
                                 } else {
-                                    let isProcessDone: boolean = await this.CreateUserDB(req.ownerid, licId);
+                                    errorCode = 12;
                                 }
                             }
                         } else {
                             errorCode = 7;
                         }
                     } else if (!isNewLicense && errorCode == 0) {
-                        //update existing license info
+                        //TBD: update existing license info
                     } else {
                         errorCode = 6;
                     }

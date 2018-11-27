@@ -141,6 +141,8 @@ class RegisterUtilHandler {
                 retVal.CreatedAt = new Date();
                 retVal.UpdatedAt = new Date();
                 retVal.Active = 'Y';
+                retVal.IsDBCreated = 'N';
+                retVal.Licensed = 'N';
             }
         } catch (e) {
             throw e;

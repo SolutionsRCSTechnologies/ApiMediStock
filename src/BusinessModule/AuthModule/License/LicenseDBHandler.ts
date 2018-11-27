@@ -5,7 +5,7 @@ import { DBConfig, MainDBCollection, UserDBCollectionArr } from '../../../DBModu
 import { DBClient } from '../../../DBModule/DBClient';
 import { DBConfigEntity, MethodResponse } from '../../../CommonModule/Entities';
 import { isRegExp, isDate } from 'util';
-import { RegistrationDetail, User, LicenseDetail } from '../../../CommonModule/DBEntities';
+import { RegistrationDetail, User, LicenseDetail, LicensePurchase } from '../../../CommonModule/DBEntities';
 
 class LicenseDBHandler {
     async ValidateLicense(licid: string) {
@@ -289,6 +289,50 @@ class LicenseDBHandler {
             }
         } catch (e) {
             throw e;
+        }
+        return retVal;
+    }
+
+    async CreateNewLicensePurchase(licObj: LicensePurchase) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        let result: any = null;
+        let errorCode: number = 0;
+        try {
+            if (licObj) {
+                let config = DBConfig;
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                await db.collection(MainDBCollection.LicensePurchase).insertOne(licObj).then(res => {
+                    if (res && res.insertedCount > 0) {
+                        result = licObj.LicPurId;
+                    } else {
+                        errorCode = 2;
+                    }
+                }).catch(err => {
+                    throw err;
+                });
+            } else {
+                errorCode = 1;
+            }
+            retVal.ErrorCode = errorCode;
+            switch (errorCode) {
+                case 1:
+                    retVal.Message = 'License object is null or empty.';
+                    break;
+                case 2:
+                    retVal.Message = 'License creation is unsuccessfull.';
+                    break;
+                default:
+                    retVal.Result = result;
+                    break;
+            }
+        } catch (e) {
+            throw e;
+        } finally {
+            if (mClient) {
+                mClient.close();
+            }
         }
         return retVal;
     }
