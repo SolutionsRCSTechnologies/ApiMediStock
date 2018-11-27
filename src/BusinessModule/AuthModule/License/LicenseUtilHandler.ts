@@ -203,7 +203,7 @@ class LicenseUtilHandler {
                         totalprice = reqObj.duration * reqObj.dailyprice;
                         if (reqObj.duration > 31) {
                             totMonth = reqObj.duration % 30 > 0 ? reqObj.duration / 30 + 1 : reqObj.duration / 30;
-                            monthlyPayable = totalprice / totMonth;
+                            monthlyPayable = totalprice;
                         }
                         break;
                     case 'MONTHLY':
