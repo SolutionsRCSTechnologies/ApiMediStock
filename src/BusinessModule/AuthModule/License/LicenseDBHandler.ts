@@ -264,7 +264,9 @@ class LicenseDBHandler {
                             ismonthly: res.ismonthly,
                             isyearly: res.isyearly,
                             duration: res.duration,
-                            maxusers: res.maxusers
+                            maxusers: res.maxusers,
+                            minduration: res.minduration,
+                            paymentclearlengthindays: res.paymentclearlengthindays
                         };
                     } else {
                         errorCode = 2;
@@ -322,6 +324,113 @@ class LicenseDBHandler {
                     break;
                 case 2:
                     retVal.Message = 'License creation is unsuccessfull.';
+                    break;
+                default:
+                    retVal.Result = result;
+                    break;
+            }
+        } catch (e) {
+            throw e;
+        } finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
+
+    async UpdateUserDBNameInLicense(licId: string, ownerId: string, dbName: string, dbUrl?: string) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        let errorCode: number = 0;
+        let result: any = null;
+        try {
+            if (licId && ownerId && dbName && licId.length > 0 && ownerId.length > 0 && dbName.length > 0) {
+                dbUrl = dbUrl && dbUrl.length > 0 ? dbUrl : '';
+                let config = DBConfig;
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                await db.collection(MainDBCollection.Licenses).findOneAndUpdate({ licid: licId, ownerid: ownerId, userdb: '', dbcreated: 'N' },
+                    { $set: { dbcreated: 'Y', userdb: dbName, userdburl: dbUrl } }).then(res => {
+                        if (!res.lastErrorObject) {
+                            result = true;
+                        } else {
+                            errorCode = 2;
+                        }
+                    }).catch(err => {
+                        throw err;
+                    });
+            } else {
+                errorCode = 1;
+            }
+            retVal.ErrorCode = errorCode;
+            switch (errorCode) {
+                case 1:
+                    retVal.Message = 'Request is not valid.';
+                    break;
+                case 2:
+                    retVal.Message = 'Some error occurred during database update.';
+                    break;
+                default:
+                    retVal.Result = result;
+                    break;
+            }
+        } catch (e) {
+            throw e;
+        } finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
+
+    async ChangeActiveStatusOfLicense(licId: string, isActive: boolean) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        let errorCode: number = 0;
+        let result: boolean = false;
+        try {
+            if (licId && licId.length > 0) {
+                let stat: string = isActive ? 'Y' : 'N';
+                let config = DBConfig;
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                await db.collection(MainDBCollection.Licenses).findOneAndUpdate({ licid: licId },
+                    { $set: { active: stat } }).then(res => {
+                        if (!res.lastErrorObject) {
+                            result = true;
+                        } else {
+                            errorCode = 2;
+                        }
+                    }).catch(err => {
+                        throw err;
+                    });
+                if (result) {
+                    await db.collection(MainDBCollection.LicensePurchase).findOneAndUpdate({ licid: licId, active: 'Y' },
+                        { $set: { active: stat } }).then(res => {
+                            if (!res.lastErrorObject) {
+                                result = true;
+                            } else {
+                                errorCode = 3;
+                            }
+                        }).catch(err => {
+                            throw err;
+                        });
+                }
+            } else {
+                errorCode = 1;
+            }
+            retVal.ErrorCode = errorCode;
+            switch (errorCode) {
+                case 1:
+                    retVal.Message = 'Empty license id.';
+                    break;
+                case 2:
+                    retVal.Message = 'Error occurred during license table update.';
+                    break;
+                case 3:
+                    retVal.Message = 'Error occurred during license purchase table update.';
                     break;
                 default:
                     retVal.Result = result;

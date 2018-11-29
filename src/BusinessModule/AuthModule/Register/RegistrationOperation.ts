@@ -14,7 +14,7 @@ class RegistrationOperations {
         let result = null;
         try {
             let isOwnerIdAvailable = await RegistrationDBHandle.CheckExistingOwnerId(reqData);
-            if (isOwnerIdAvailable && isOwnerIdAvailable.ErrorCode == 0 && isOwnerIdAvailable.Result) {
+            if (isOwnerIdAvailable && isOwnerIdAvailable.ErrorCode == 0 && isOwnerIdAvailable.Result == true) {
                 //Get Owner User info
                 let ownerInfo: User = await RegisterUtilHandle.GetOwnerUserDoc(reqData);
                 //ownerInfo.PersonId = await Util.GetCustomGuidStr('UO');
@@ -329,7 +329,7 @@ class RegistrationOperations {
                             stat = 'Y';
                             break;
                     }
-                    retVal = await RegistrationDBHandle.UpdateStatus(ownerId, licid, stat);
+                    retVal = await RegistrationDBHandle.UpdateCollectionStatus(ownerId, licid, stat);
                 } else {
                     retVal.ErrorCode = 2;
                     retVal.Message = 'User DataBase name is empty.';
@@ -357,6 +357,12 @@ class RegistrationOperations {
         } catch (e) {
 
         }
+        return retVal;
+    }
+
+    async UpdateLicenseIdInRegistration(ownerId: string, licId: string) {
+        let retVal: MethodResponse = new MethodResponse();
+        //TBD:
         return retVal;
     }
 }

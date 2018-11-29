@@ -34,6 +34,7 @@ export class LicenseDetail {
     private maxuser: number;
     private userdb: string;
     private userdburl: string;
+    private dbcreated: string = 'N';
     private licstartdate: Date = new Date();
     private licenddate: Date = new Date();
     //private licpurcrefid: string;
@@ -54,12 +55,12 @@ export class LicenseDetail {
         });
     }
 
-    // public get LicPurchaseRefId(): string {
-    //     return this.licpurcrefid;
-    // }
-    // public set LicPurchaseRefId(val) {
-    //     this.licpurcrefid = val;
-    // }
+    public get DBCreated(): string {
+        return this.dbcreated;
+    }
+    public set DBCreated(val) {
+        this.dbcreated = val;
+    }
     public get OwnerId(): string {
         return this.ownerid;
     }
@@ -147,22 +148,24 @@ export class LicensePurchase {
     private subscriptiontype: string;
     private subscriptionlength: number;
     private lictype: string;
-    private paymentoption: string;
-    private monthlyprice: Double;
-    private yearlyprice: Double;
+    //private paymentoption: string;
+    //private monthlyprice: Double;
+    //private yearlyprice: Double;
     //private monthlypayableprice: Double;
-    private totalprice: Double;
-    private discountpercentage: Double = 0.0;
-    private discountamount: Double = 0.0;
+    private totalprice: number;
+    private discountpercentage: number = 0.0;
+    private discountamount: number = 0.0;
     private applydiscountpercentage: string = 'N';
     private applydiscountamount: string = 'N';
-    private lastpaymentamount: Double = 0.0;
+    private lastpaymentamount: number = 0.0;
     private lastpaymentdt: Date = new Date(2000, 1, 1);
-    private totalpaidamount: Double = 0.0;
-    private totalpendingamount: Double = 0.0;
-    private currentpendingmonthlyamount: Double = 0.0;
-    private currentpendingyearlyamount: Double = 0.0;
-    private missedpaymentcyclecount: number = 0;
+    private totalpaidamount: number = 0.0;
+    private totalpendingamount: number = 0.0;
+    private totalpayablelicamount: number = 0.0;
+    private totaldiscountamount: number = 0.0;
+    private paymentcleardate: Date = null;
+    //private currentpendingyearlyamount: Double = 0.0;
+    //private missedpaymentcyclecount: number = 0;
     private ownerid: string;
     private createdat: Date = new Date();
     private updatedat: Date = new Date();
@@ -187,6 +190,24 @@ export class LicensePurchase {
         }
     }
 
+    public get PaymentClearDate(): Date {
+        return this.paymentcleardate;
+    }
+    public set PaymentClearDate(val) {
+        this.paymentcleardate = val;
+    }
+    public get TotalDiscountAmount(): number {
+        return this.totaldiscountamount;
+    }
+    public set TotalDiscountAmount(val) {
+        this.totaldiscountamount = val;
+    }
+    public get TotalPayableLicAmount(): number {
+        return this.totalpayablelicamount;
+    }
+    public set TotalPayableLicAmount(val) {
+        this.totalpayablelicamount = val;
+    }
     public get Active(): string {
         return this.active;
     }
@@ -196,30 +217,30 @@ export class LicensePurchase {
     public get LicPurId(): string {
         return this.licpurid;
     }
-    public get TotalPendingAmount(): Double {
+    public get TotalPendingAmount(): number {
         return this.totalpendingamount;
     }
     public set TotalPendingAmount(val) {
         this.totalpendingamount = val;
     }
-    public get CurrentPendingMonthlyAmount(): Double {
-        return this.currentpendingmonthlyamount;
-    }
-    public set CurrentPendingMonthlyAmount(val) {
-        this.currentpendingmonthlyamount = val;
-    }
-    public get CurrentPendingYearlyAmount(): Double {
-        return this.currentpendingyearlyamount;
-    }
-    public set CurrentPendingYearlyAmount(val) {
-        this.currentpendingyearlyamount = val;
-    }
-    public get MissedPaymentCycleCount(): number {
-        return this.missedpaymentcyclecount;
-    }
-    public set MissedPaymentCycleCount(val) {
-        this.missedpaymentcyclecount = val;
-    }
+    // public get CurrentPendingMonthlyAmount(): Double {
+    //     return this.currentpendingmonthlyamount;
+    // }
+    // public set CurrentPendingMonthlyAmount(val) {
+    //     this.currentpendingmonthlyamount = val;
+    // }
+    // public get CurrentPendingYearlyAmount(): Double {
+    //     return this.currentpendingyearlyamount;
+    // }
+    // public set CurrentPendingYearlyAmount(val) {
+    //     this.currentpendingyearlyamount = val;
+    // }
+    // public get MissedPaymentCycleCount(): number {
+    //     return this.missedpaymentcyclecount;
+    // }
+    // public set MissedPaymentCycleCount(val) {
+    //     this.missedpaymentcyclecount = val;
+    // }
     public get OwnerId(): string {
         return this.ownerid;
     }
@@ -250,19 +271,19 @@ export class LicensePurchase {
     public set CreatedBy(val) {
         this.createdby = val;
     }
-    public get TotalPrice(): Double {
+    public get TotalPrice(): number {
         return this.totalprice;
     }
     public set TotalPrice(val) {
         this.totalprice = val;
     }
-    public get DiscountPercentage(): Double {
+    public get DiscountPercentage(): number {
         return this.discountpercentage;
     }
     public set DiscountPercentage(val) {
         this.discountpercentage = val;
     }
-    public get DiscountAmount(): Double {
+    public get DiscountAmount(): number {
         return this.discountamount;
     }
     public set DiscountAmount(val) {
@@ -280,7 +301,7 @@ export class LicensePurchase {
     public set ApplyDiscountAmount(val) {
         this.applydiscountamount = val;
     }
-    public get LastPaymentAmount(): Double {
+    public get LastPaymentAmount(): number {
         return this.lastpaymentamount;
     }
     public set LastPaymentAmount(val) {
@@ -292,7 +313,7 @@ export class LicensePurchase {
     public set LastPaymentDt(val) {
         this.lastpaymentdt = val;
     }
-    public get TotalPaidAmount(): Double {
+    public get TotalPaidAmount(): number {
         return this.totalpaidamount;
     }
     public set TotalPaidAmount(val) {
@@ -304,24 +325,24 @@ export class LicensePurchase {
     // public set MonthlyPayablePrice(val) {
     //     this.monthlypayableprice = val;
     // }
-    public get YearlyPrice(): Double {
-        return this.yearlyprice;
-    }
-    public set YearlyPrice(val) {
-        this.yearlyprice = val;
-    }
-    public get MonthlyPrice(): Double {
-        return this.monthlyprice;
-    }
-    public set MonthlyPrice(val) {
-        this.monthlyprice = val;
-    }
-    public get PaymentOption(): string {
-        return this.paymentoption;
-    }
-    public set PaymentOption(val) {
-        this.paymentoption = val;
-    }
+    // public get YearlyPrice(): Double {
+    //     return this.yearlyprice;
+    // }
+    // public set YearlyPrice(val) {
+    //     this.yearlyprice = val;
+    // }
+    // public get MonthlyPrice(): Double {
+    //     return this.monthlyprice;
+    // }
+    // public set MonthlyPrice(val) {
+    //     this.monthlyprice = val;
+    // }
+    // public get PaymentOption(): string {
+    //     return this.paymentoption;
+    // }
+    // public set PaymentOption(val) {
+    //     this.paymentoption = val;
+    // }
     public get LicType(): string {
         return this.lictype;
     }
@@ -511,8 +532,8 @@ export class RegistrationDetail {
     private licensed: string;
     private userdbname: string;
     private userdburl: string;
-    private isdbcreated: string;
-    private createcollectionstat: string;
+    //private isdbcreated: string;
+    private collectioncreated: string;
 
     constructor() {
         Util.GetCustomGuidStr('REG').then(val => {
@@ -525,17 +546,17 @@ export class RegistrationDetail {
         });
     }
 
-    public get IsDBCreated(): string {
-        return this.isdbcreated;
+    // public get IsDBCreated(): string {
+    //     return this.isdbcreated;
+    // }
+    // public set IsDBCreated(val) {
+    //     this.isdbcreated = val;
+    // }
+    public get CollectionCreated(): string {
+        return this.collectioncreated;
     }
-    public set IsDBCreated(val) {
-        this.isdbcreated = val;
-    }
-    public get CreateCollectionStat(): string {
-        return this.createcollectionstat;
-    }
-    public set CreateCollectionStat(val) {
-        this.createcollectionstat = val;
+    public set CollectionCreated(val) {
+        this.collectioncreated = val;
     }
     public get UserDBName(): string {
         return this.userdbname;

@@ -64,6 +64,7 @@ class LicenseOpHandler {
                 let isDBCreated: boolean = await LicenseDBHandle.CreateUserDB(dbName);
                 if (isDBCreated) {
                     //First Update UserDB name in Registration table. set collection creation completed as false.
+                    output = await LicenseDBHandle.UpdateUserDBNameInLicense(licId, userName, dbName);
                     output = await RegistrationOpHandle.UpdateUserDBName(userName, licId, dbName);
                     output = await RegistrationOpHandle.UpdateCollectionCreationStatus(userName, licId, 'START');
                     //Create userDB collections creation.
@@ -71,7 +72,11 @@ class LicenseOpHandler {
                     //Set collection creation completed as true.
                     output = await RegistrationOpHandle.UpdateCollectionCreationStatus(userName, licId, 'DONE');
                     isProcessDone = true;
+                } else {
+                    isProcessDone = false;
                 }
+            } else {
+                isProcessDone = false;
             }
         } catch (e) {
             throw e;
@@ -116,8 +121,14 @@ class LicenseOpHandler {
                             } else if (result.expiredate >= currentDate) {
                                 let modifyIfAny: boolean = req.modifyifany && req.modifyifany == 'Y';
                                 if (modifyIfAny) {
-                                    //TBD: Inactive existing license
-                                    //isNewLicense = true;
+                                    //Inactive existing license
+                                    output = null;
+                                    output = await LicenseDBHandle.ChangeActiveStatusOfLicense(licId, false);
+                                    if (output && output.ErrorCode == 0 && output.Result) {
+                                        isNewLicense = true;
+                                    } else {
+                                        errorCode = 13;
+                                    }
                                 } else {
                                     errorCode = 4;
                                 }
@@ -145,45 +156,58 @@ class LicenseOpHandler {
                             let typeResult = output.Result;
                             let duration: number = 0;
                             let subsType: string = '';
+                            let minDuration: number = 0;
+                            let paymentClearLengthInDays: number = 0;
                             let isDaily: boolean = req.isdaily && req.isdaily.trim().toUpperCase() == 'Y';
                             let isMonthly: boolean = req.ismonthly && req.ismonthly.trim().toUpperCase() == 'Y';
                             let isYearly: boolean = req.isyearly && req.isyearly.trim().toUpperCase() == 'Y';
                             if (typeResult.subscriptionlength && typeResult.subscriptionlength > 0) {
                                 duration = typeResult.subscriptionlength;
                             }
-                            if (req.subscriptiontype && typeResult.subscriptiontype > 0) {
-                                subsType = typeResult.subscriptiontype.trim().toUpperCase();
-                                switch (subsType) {
-                                    case 'DAILY':
-                                        if (isDaily) {
-                                            let curDay: number = endDt.getDate();
-                                            endDt.setDate(curDay + duration);
-                                        } else {
-                                            errorCode = 8;
-                                        }
-                                        break;
-                                    case 'MONTHLY':
-                                        if (isMonthly) {
-                                            let curMon: number = endDt.getMonth();
-                                            endDt.setMonth(curMon + duration);
-                                        } else {
-                                            errorCode = 9;
-                                        }
-                                        break;
-                                    case 'YEARLY':
-                                        if (isYearly) {
-                                            let curYear: number = endDt.getFullYear();
-                                            endDt.setFullYear(curYear + duration);
-                                        } else {
-                                            errorCode = 10;
-                                        }
-                                        break;
-                                    default:
-                                        errorCode = 11;
-                                        break;
+                            if (typeResult.minduration && typeResult.minduration > 0) {
+                                minDuration = typeResult.minduration;
+                            }
+                            if (typeResult.paymentclearlengthindays && typeResult.paymentclearlengthindays > 0) {
+                                paymentClearLengthInDays = typeResult.paymentclearlengthindays;
+                            }
+                            if (duration >= minDuration) {
+                                if (req.subscriptiontype && typeResult.subscriptiontype > 0) {
+                                    subsType = typeResult.subscriptiontype.trim().toUpperCase();
+                                    switch (subsType) {
+                                        case 'DAILY':
+                                            if (isDaily) {
+                                                let curDay: number = endDt.getDate();
+                                                endDt.setDate(curDay + duration);
+                                            } else {
+                                                errorCode = 8;
+                                            }
+                                            break;
+                                        case 'MONTHLY':
+                                            if (isMonthly) {
+                                                let curMon: number = endDt.getMonth();
+                                                endDt.setMonth(curMon + duration);
+                                            } else {
+                                                errorCode = 9;
+                                            }
+                                            break;
+                                        case 'YEARLY':
+                                            if (isYearly) {
+                                                let curYear: number = endDt.getFullYear();
+                                                endDt.setFullYear(curYear + duration);
+                                            } else {
+                                                errorCode = 10;
+                                            }
+                                            break;
+                                        default:
+                                            errorCode = 11;
+                                            break;
+                                    }
                                 }
+                            } else {
+                                errorCode = 14;
                             }
                             if (errorCode == 0) {
+                                let paymentOption: any = req.paymentdetail ? req.paymentdetail : null;
                                 let reqObj: any = {
                                     lictype: typeResult.type,
                                     maxusers: typeResult.maxusers,
@@ -194,7 +218,10 @@ class LicenseOpHandler {
                                     yearlyprice: typeResult.yearlyprice,
                                     monthlyprice: typeResult.monthlyprice,
                                     dailyprice: typeResult.dailyprice,
-                                    duration: duration
+                                    duration: duration,
+                                    paymentoptions: paymentOption,
+                                    expiredate: endDt,
+                                    paymentclearlengthindays: paymentClearLengthInDays
                                 };
                                 let licObj: LicenseDetail = await LicenseUtilHandle.GetLicenseInstance(reqObj);
                                 //create new license
@@ -208,15 +235,16 @@ class LicenseOpHandler {
                                     licPurchaseObj = await LicenseUtilHandle.GetLicensePurchaseInstance(licId, reqObj);
                                     //Entry to License Purchase Collection
                                     output = await LicenseDBHandle.CreateNewLicensePurchase(licPurchaseObj);
-                                    //Update payment information (Create payment table entry during registration)
-                                    if (isDBExist) {
+                                    //update license id in existing registration info
+                                    output = await RegistrationOpHandle.UpdateLicenseIdInRegistration(req.ownerid, licId);
+                                    output = await RegistrationOpHandle.UpdateLicenseStatus(req.ownerid, licId, true);
+                                    if (!isDBExist) {
                                         //Extend existing registraion information
-                                        //TBD: update license id in existing registration info
-                                        output = await RegistrationOpHandle.UpdateLicenseStatus(req.ownerid, licId, true);
-                                    } else {
-                                        output = await RegistrationOpHandle.UpdateLicenseStatus(req.ownerid, licId, true);
-                                        let isProcessDone: boolean = await this.CreateUserDB(req.ownerid, licId);
-                                        //TBD: Update DB creation in registration detail collection.
+                                        if (await this.CreateUserDB(req.ownerid, licId)) {
+                                            result = 'License registration is completed successfully.'
+                                        } else {
+                                            result = 'License registration is successful but some error occurred during user database creation.';
+                                        }
                                     }
                                 } else {
                                     errorCode = 12;
@@ -225,10 +253,8 @@ class LicenseOpHandler {
                         } else {
                             errorCode = 7;
                         }
-                    } else if (!isNewLicense && errorCode == 0) {
-                        //TBD: update existing license info
                     } else {
-                        errorCode = 6;
+                        errorCode = errorCode > 0 ? errorCode : 6;
                     }
                 } else {
                     errorCode = 2;
@@ -254,6 +280,27 @@ class LicenseOpHandler {
                     retVal.Message = '';
                     break;
                 case 6:
+                    retVal.Message = '';
+                    break;
+                case 7:
+                    retVal.Message = '';
+                    break;
+                case 8:
+                    retVal.Message = '';
+                    break;
+                case 9:
+                    retVal.Message = '';
+                    break;
+                case 10:
+                    retVal.Message = '';
+                    break;
+                case 11:
+                    retVal.Message = '';
+                    break;
+                case 12:
+                    retVal.Message = '';
+                    break;
+                case 13:
                     retVal.Message = '';
                     break;
                 default:

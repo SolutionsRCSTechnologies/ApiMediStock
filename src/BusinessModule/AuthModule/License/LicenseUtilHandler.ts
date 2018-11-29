@@ -60,8 +60,18 @@ class LicenseUtilHandler {
                 retVal = false;
             }
             if (req.paymentdetail) {
-                if (!(req.paidamount && req.paidamount > 0)) {
-                    retVal = false;
+                // if (!(req.paidamount && req.paidamount > 0)) {
+                //     retVal = false;
+                // }
+                if (req.applydiscountamount && req.applydiscountamount.length > 0) {
+                    if (!(req.discountamount && req.discountamount > 0)) {
+                        retVal = false;
+                    }
+                }
+                if (req.applydiscountpercentage && req.applydiscountpercentage.length > 0) {
+                    if (!(req.discountpercentage && req.discountpercentage > 0)) {
+                        retVal = false;
+                    }
                 }
             }
         } else {
@@ -90,16 +100,16 @@ class LicenseUtilHandler {
                 } else {
                     retVal.ApplyDiscountAmount = 'N';
                 }
-                if (req.currpendingmonthlyamount && req.currpendingmonthlyamount > 0) {
-                    retVal.CurrentPendingMonthlyAmount = req.currpendingmonthlyamount;
-                } else {
-                    retVal.CurrentPendingMonthlyAmount = 0;
-                }
-                if (req.currpendingyearlyamount && req.currpendingyearlyamount > 0) {
-                    retVal.CurrentPendingYearlyAmount = req.currpendingyearlyamount;
-                } else {
-                    retVal.CurrentPendingYearlyAmount = 0;
-                }
+                // if (req.currpendingmonthlyamount && req.currpendingmonthlyamount > 0) {
+                //     retVal.CurrentPendingMonthlyAmount = req.currpendingmonthlyamount;
+                // } else {
+                //     retVal.CurrentPendingMonthlyAmount = 0;
+                // }
+                // if (req.currpendingyearlyamount && req.currpendingyearlyamount > 0) {
+                //     retVal.CurrentPendingYearlyAmount = req.currpendingyearlyamount;
+                // } else {
+                //     retVal.CurrentPendingYearlyAmount = 0;
+                // }
                 if (req.discountamount && req.discountamount > 0) {
                     retVal.DiscountAmount = req.discountamount;
                 } else {
@@ -125,26 +135,26 @@ class LicenseUtilHandler {
                 } else {
                     retVal.LicType = '';
                 }
-                if (req.missedpaymentcyclecount && req.missedpaymentcyclecount > 0) {
-                    retVal.MissedPaymentCycleCount = req.missedpaymentcyclecount;
-                } else {
-                    retVal.MissedPaymentCycleCount = 1;
-                }
+                // if (req.missedpaymentcyclecount && req.missedpaymentcyclecount > 0) {
+                //     retVal.MissedPaymentCycleCount = req.missedpaymentcyclecount;
+                // } else {
+                //     retVal.MissedPaymentCycleCount = 1;
+                // }
                 // if (req.monthlypayableprice && req.monthlypayableprice > 0) {
                 //     retVal.MonthlyPayablePrice = req.monthlypayableprice;
                 // } else {
                 //     retVal.MonthlyPayablePrice = 0;
                 // }
-                if (req.monthlyprice && req.monthlyprice > 0) {
-                    retVal.MonthlyPrice = req.monthlyprice;
-                } else {
-                    retVal.MonthlyPrice = 0;
-                }
-                if (req.paymentoption && req.paymentoption.length > 0) {
-                    retVal.PaymentOption = req.paymentoption;
-                } else {
-                    retVal.PaymentOption = 'MONTHLY';
-                }
+                // if (req.monthlyprice && req.monthlyprice > 0) {
+                //     retVal.MonthlyPrice = req.monthlyprice;
+                // } else {
+                //     retVal.MonthlyPrice = 0;
+                // }
+                // if (req.paymentoption && req.paymentoption.length > 0) {
+                //     retVal.PaymentOption = req.paymentoption;
+                // } else {
+                //     retVal.PaymentOption = 'MONTHLY';
+                // }
                 if (req.subscriptionlength && req.subscriptionlength > 0) {
                     retVal.SubscriptionLength = req.subscriptionlength;
                 } else {
@@ -170,11 +180,24 @@ class LicenseUtilHandler {
                 } else {
                     retVal.TotalPrice = 0;
                 }
-                if (req.yearlyprice && req.yearlyprice > 0) {
-                    retVal.YearlyPrice = req.yearlyprice;
+                if (req.totalpayablelicamount && req.totalpayablelicamount > 0) {
+                    retVal.TotalPayableLicAmount = req.totalpayablelicamount;
                 } else {
-                    retVal.YearlyPrice = 0;
+                    retVal.TotalPayableLicAmount = 0;
                 }
+                if (req.totaldiscountamount && req.totaldiscountamount > 0) {
+                    retVal.TotalDiscountAmount = req.totaldiscountamount;
+                } else {
+                    retVal.TotalDiscountAmount = 0;
+                }
+                if (req.paymentcleardate) {
+                    retVal.PaymentClearDate = req.paymentcleardate;
+                }
+                // if (req.yearlyprice && req.yearlyprice > 0) {
+                //     retVal.YearlyPrice = req.yearlyprice;
+                // } else {
+                //     retVal.YearlyPrice = 0;
+                // }
                 retVal.CreatedAt = new Date();
                 retVal.UpdatedAt = new Date();
                 retVal.CreatedBy = 'SYSTEM';
@@ -192,19 +215,16 @@ class LicenseUtilHandler {
     async GetLicensePurchaseInstance(licid: string, reqObj: any) {
         let retVal: LicensePurchase = new LicensePurchase();
         try {
-            let totalprice: Double = 0;
-            let monthlyPayable: Double = 0;
-            let yearlyPayable: Double = 0;
+            let totalprice: number = 0;
             let totMonth: number = 0;
             let curMonth: number = new Date().getMonth();
+            let payableAmount: number = 0;
+            let discountedTotal: number = 0;
+
             if (reqObj) {
                 switch (reqObj.substype) {
                     case 'DAILY':
                         totalprice = reqObj.duration * reqObj.dailyprice;
-                        if (reqObj.duration > 31) {
-                            totMonth = reqObj.duration % 30 > 0 ? reqObj.duration / 30 + 1 : reqObj.duration / 30;
-                            monthlyPayable = totalprice;
-                        }
                         break;
                     case 'MONTHLY':
                         totalprice = reqObj.duration * reqObj.monthlyprice;
@@ -213,15 +233,54 @@ class LicenseUtilHandler {
                         totalprice = reqObj.duration * reqObj.yearlyprice;
                         break;
                 }
+                payableAmount = totalprice;
+                let isDiscountPerApp: boolean = false;
+                let isDiscountAmtApp: boolean = false;
+                let discountAmt: number = 0;
+                let discountPer: number = 0;
+                let lastPaidAmt: number = 0;
+                let totalPendingAmt: number = 0;
+                let dtOfPaymentClearance: Date = new Date();
+                let expireDate: Date = reqObj.expiredate && isDate(reqObj.expiredate) ? reqObj.expiredate : new Date();
+                let paymentClearLengthDays: number = reqObj.paymentclearlengthindays && reqObj.paymentclearlengthindays > 0 ? reqObj.paymentclearlengthindays : 10;
+                if (reqObj.paymentoptions) {
+                    let payment = reqObj.paymentoptions;
+                    isDiscountAmtApp = payment.applydiscountamount && payment.applydiscountamount.trim().toUpperCase() == 'Y';
+                    isDiscountPerApp = payment.applydiscountpercentage && payment.applydiscountpercentage.trim().toUpperCase() == 'Y';
+                    discountAmt = payment.discountamount && payment.discountamount > 0 ? payment.discountamount : 0;
+                    discountPer = payment.discountpercentage && payment.discountpercentage > 0 ? payment.discountpercentage : 0;
+                    lastPaidAmt = payment.paidamount && payment.paidamount > 0 ? payment.paidamount : 0;
+
+                    if (isDiscountAmtApp) {
+                        discountedTotal = discountAmt;
+                    } else if (isDiscountPerApp) {
+                        discountedTotal = (totalprice * discountPer) / 100;
+                    }
+                    payableAmount = discountedTotal > totalprice ? 0.0 : totalprice - discountedTotal;
+                    totalPendingAmt = payableAmount - lastPaidAmt;
+                    if (totalPendingAmt > 0) {
+                        dtOfPaymentClearance.setDate(paymentClearLengthDays);
+                    } else {
+                        dtOfPaymentClearance = expireDate;
+                    }
+                }
+
                 let req: any = {
                     lictype: reqObj.lictype,
                     ownerid: reqObj.ownerid,
                     subscriptiontype: reqObj.substype,
                     subscriptionlength: reqObj.duration,
                     licid: licid,
-                    monthlyprice: reqObj.monthlyprice,
-                    yearlyprice: reqObj.yearlyprice,
-                    totalprice: totalprice
+                    totalprice: totalprice,
+                    totalpayablelicamount: payableAmount,
+                    totaldiscountamount: discountedTotal,
+                    applydiscountamount: isDiscountAmtApp ? 'Y' : 'N',
+                    applydiscountpercentage: isDiscountPerApp ? 'Y' : 'N',
+                    totalpaidamount: lastPaidAmt,
+                    totalpendingamount: totalPendingAmt,
+                    lastpaymentamount: lastPaidAmt,
+                    lastpaymentdt: new Date(),
+                    paymentcleardate: dtOfPaymentClearance
                 };
                 retVal = await this.GetLicPurchaseInstance(req);
             } else {

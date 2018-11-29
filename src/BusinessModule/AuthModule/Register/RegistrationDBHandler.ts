@@ -322,9 +322,9 @@ class RegistrationDBHandler {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.Registrations).updateOne({ ownerid: ownerid, active: 'Y', licensed: 'Y' },
+                await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerid, active: 'Y', licensed: 'Y' },
                     { $set: { users: updatedusers } }).then(res => {
-                        if (res && res.modifiedCount < 1) {
+                        if (!res.lastErrorObject) {
                             errorCode = 1;
                         }
                     }).catch(err => {
@@ -487,7 +487,7 @@ class RegistrationDBHandler {
         return retVal;
     }
 
-    async UpdateStatus(ownerid: string, licid: string, stat: string) {
+    async UpdateCollectionStatus(ownerid: string, licid: string, stat: string) {
         let retVal: MethodResponse = new MethodResponse();
         let mClient: MongoClient = null;
         try {
@@ -508,7 +508,7 @@ class RegistrationDBHandler {
                 let db: Db = await mClient.db(config.MainDBName);
                 retVal.Result = false;
                 await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerid, licid: licid, active: 'Y', licensed: 'Y' },
-                    { $set: { createcollectionstat: status } }).then(res => {
+                    { $set: { collectioncreated: status } }).then(res => {
                         if (res && res.value) {
                             console.log('Status updated');
                             retVal.Result = true;
