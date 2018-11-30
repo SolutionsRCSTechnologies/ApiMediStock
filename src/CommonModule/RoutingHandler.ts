@@ -2,6 +2,7 @@ import { LoginHandle } from '../BusinessModule/AuthModule/Login/LoginHandler';
 import { RegistrationHandle } from '../BusinessModule/AuthModule/Register/RegistrationHandler';
 import { OrderHandle } from '../BusinessModule/OrderModule/OrderHandler';
 import { Util } from './UtilHandler';
+import { LicenseHandle } from '../BusinessModule/AuthModule/License/LicenseHandler';
 
 
 enum APIMethodType {
@@ -49,6 +50,16 @@ class RoutingMethods {
         }
         return retVal;
     }
+
+    public async RegisterLicense(reqData: any) {
+        let retVal: any;
+        try {
+            retVal = await LicenseHandle.RegisterLicense(reqData);
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
 }
 
 export const RoutingHandler = [
@@ -82,6 +93,12 @@ export const RoutingHandler = [
         handler: new RoutingMethods().ActivateUser,
         method: APIMethodType.POST,
         name: "Registration Api"
+    },
+    {
+        url: '/auth/license/register',
+        handler: new RoutingMethods().RegisterLicense,
+        method: APIMethodType.POST,
+        name: 'License registration Api'
     }
 ];
 

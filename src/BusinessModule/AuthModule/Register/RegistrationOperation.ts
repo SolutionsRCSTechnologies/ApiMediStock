@@ -362,7 +362,11 @@ class RegistrationOperations {
 
     async UpdateLicenseIdInRegistration(ownerId: string, licId: string) {
         let retVal: MethodResponse = new MethodResponse();
-        //TBD:
+        try {
+            retVal = await RegistrationDBHandle.UpdateLicenseIdInRegistration(ownerId, licId);
+        } catch (e) {
+            throw e;
+        }
         return retVal;
     }
 }

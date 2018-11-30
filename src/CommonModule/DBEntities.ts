@@ -161,7 +161,7 @@ export class LicensePurchase {
     private lastpaymentdt: Date = new Date(2000, 1, 1);
     private totalpaidamount: number = 0.0;
     private totalpendingamount: number = 0.0;
-    private totalpayablelicamount: number = 0.0;
+    private totalpayableamount: number = 0.0;
     private totaldiscountamount: number = 0.0;
     private paymentcleardate: Date = null;
     //private currentpendingyearlyamount: Double = 0.0;
@@ -202,11 +202,11 @@ export class LicensePurchase {
     public set TotalDiscountAmount(val) {
         this.totaldiscountamount = val;
     }
-    public get TotalPayableLicAmount(): number {
-        return this.totalpayablelicamount;
+    public get TotalPayableAmount(): number {
+        return this.totalpayableamount;
     }
-    public set TotalPayableLicAmount(val) {
-        this.totalpayablelicamount = val;
+    public set TotalPayableAmount(val) {
+        this.totalpayableamount = val;
     }
     public get Active(): string {
         return this.active;

@@ -667,6 +667,53 @@ class RegistrationDBHandler {
         }
         return retVal;
     }
+
+    async UpdateLicenseIdInRegistration(ownerId: string, licId: string) {
+        let retVal: MethodResponse = new MethodResponse();
+        let errorCode: number = 0;
+        let mClient: MongoClient = null;
+        let result: any = null;
+        try {
+            if (ownerId && ownerId.length > 0 && licId && licId.length > 0) {
+                let config = DBConfig;
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                console.log(ownerId + " " + licId);
+                await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerId, active: 'Y' },
+                    { $set: { licid: licId } }).then(res => {
+                        if (res.ok > 0) {
+                            result = true;
+                        } else {
+                            errorCode = 2;
+                        }
+                    }).catch(err => {
+                        throw err;
+                    });
+            } else {
+                errorCode = 1;
+            }
+            retVal.ErrorCode = errorCode;
+            switch (errorCode) {
+                case 1:
+                    retVal.Message = 'Empty owner id or license id.';
+                    break;
+                case 2:
+                    retVal.Message = 'Some error occurred during license id update in registration table.';
+                    break;
+                default:
+                    retVal.Result = result;
+                    break;
+            }
+            console.log(errorCode + " : " + retVal.Message);
+        } catch (e) {
+            throw e;
+        } finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
 }
 
 export let RegistrationDBHandle = new RegistrationDBHandler();

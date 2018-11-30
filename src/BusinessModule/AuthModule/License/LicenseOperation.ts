@@ -158,21 +158,21 @@ class LicenseOpHandler {
                             let subsType: string = '';
                             let minDuration: number = 0;
                             let paymentClearLengthInDays: number = 0;
-                            let isDaily: boolean = req.isdaily && req.isdaily.trim().toUpperCase() == 'Y';
-                            let isMonthly: boolean = req.ismonthly && req.ismonthly.trim().toUpperCase() == 'Y';
-                            let isYearly: boolean = req.isyearly && req.isyearly.trim().toUpperCase() == 'Y';
-                            if (typeResult.subscriptionlength && typeResult.subscriptionlength > 0) {
-                                duration = typeResult.subscriptionlength;
-                            }
+                            let isDaily: boolean = typeResult.isdaily && typeResult.isdaily.trim().toUpperCase() == 'Y';
+                            let isMonthly: boolean = typeResult.ismonthly && typeResult.ismonthly.trim().toUpperCase() == 'Y';
+                            let isYearly: boolean = typeResult.isyearly && typeResult.isyearly.trim().toUpperCase() == 'Y';
                             if (typeResult.minduration && typeResult.minduration > 0) {
                                 minDuration = typeResult.minduration;
                             }
                             if (typeResult.paymentclearlengthindays && typeResult.paymentclearlengthindays > 0) {
                                 paymentClearLengthInDays = typeResult.paymentclearlengthindays;
                             }
+                            if (req.subscriptionlength && req.subscriptionlength > 0) {
+                                duration = req.subscriptionlength;
+                            }
                             if (duration >= minDuration) {
-                                if (req.subscriptiontype && typeResult.subscriptiontype > 0) {
-                                    subsType = typeResult.subscriptiontype.trim().toUpperCase();
+                                if (req.subscriptiontype && req.subscriptiontype > 0) {
+                                    subsType = req.subscriptiontype.trim().toUpperCase();
                                     switch (subsType) {
                                         case 'DAILY':
                                             if (isDaily) {
@@ -235,16 +235,32 @@ class LicenseOpHandler {
                                     licPurchaseObj = await LicenseUtilHandle.GetLicensePurchaseInstance(licId, reqObj);
                                     //Entry to License Purchase Collection
                                     output = await LicenseDBHandle.CreateNewLicensePurchase(licPurchaseObj);
-                                    //update license id in existing registration info
-                                    output = await RegistrationOpHandle.UpdateLicenseIdInRegistration(req.ownerid, licId);
-                                    output = await RegistrationOpHandle.UpdateLicenseStatus(req.ownerid, licId, true);
-                                    if (!isDBExist) {
-                                        //Extend existing registraion information
-                                        if (await this.CreateUserDB(req.ownerid, licId)) {
-                                            result = 'License registration is completed successfully.'
+                                    if (output && output.ErrorCode == 0 && output.Result) {
+                                        //update license id in existing registration info
+                                        output = null;
+                                        output = await RegistrationOpHandle.UpdateLicenseIdInRegistration(req.ownerid, licId);
+                                        if (output && output.ErrorCode == 0 && output.Result) {
+                                            output = null;
+                                            output = await RegistrationOpHandle.UpdateLicenseStatus(req.ownerid, licId, true);
+                                            if (output && output.ErrorCode == 0 && output.Result) {
+                                                if (!isDBExist) {
+                                                    //Extend existing registraion information
+                                                    if (await this.CreateUserDB(req.ownerid, licId)) {
+                                                        result = 'License registration is completed successfully.'
+                                                    } else {
+                                                        result = 'License registration is successful but some error occurred during user database creation.';
+                                                    }
+                                                } else {
+                                                    result = 'Owner has existing database to reuse and license subscription is successful.';
+                                                }
+                                            } else {
+                                                errorCode = 17;
+                                            }
                                         } else {
-                                            result = 'License registration is successful but some error occurred during user database creation.';
+                                            errorCode = 16;
                                         }
+                                    } else {
+                                        errorCode = 15;
                                     }
                                 } else {
                                     errorCode = 12;
@@ -271,37 +287,49 @@ class LicenseOpHandler {
                     retVal.Message = 'User does not have valid owner registration.';
                     break;
                 case 3:
-                    retVal.Message = '';
+                    retVal.Message = 'Owner has pending amount to pay for existing license.';
                     break;
                 case 4:
-                    retVal.Message = '';
+                    retVal.Message = 'Owner has existing active license and not requested for modify existing.';
                     break;
                 case 5:
-                    retVal.Message = '';
+                    retVal.Message = 'Some error occurred during existing license validation.';
                     break;
                 case 6:
-                    retVal.Message = '';
+                    retVal.Message = 'Not satisfied the conditions for new license creation.';
                     break;
                 case 7:
-                    retVal.Message = '';
+                    retVal.Message = 'Error occurred to fetch the license type information.';
                     break;
                 case 8:
-                    retVal.Message = '';
+                    retVal.Message = 'Requested license is not available for DAILY subscription.';
                     break;
                 case 9:
-                    retVal.Message = '';
+                    retVal.Message = 'Requested license is not available for MONTHLY subscription.';
                     break;
                 case 10:
-                    retVal.Message = '';
+                    retVal.Message = 'Requested license is not available for YEARLY subscription.';
                     break;
                 case 11:
-                    retVal.Message = '';
+                    retVal.Message = 'Requested subscription type is not valid. It should be either DAILY/MONTHLY/YEARLY.';
                     break;
                 case 12:
-                    retVal.Message = '';
+                    retVal.Message = 'Some error occurred during new license creation for the owner.';
                     break;
                 case 13:
-                    retVal.Message = '';
+                    retVal.Message = 'Owner has requested to modify existing license but some error occurred during the change of existing license status.';
+                    break;
+                case 14:
+                    retVal.Message = 'Owner request does not statisfy the minimum duration clause of license subscription.';
+                    break;
+                case 15:
+                    retVal.Message = 'Error occurred during new license purchase information creation.';
+                    break;
+                case 16:
+                    retVal.Message = 'Error occurred during license id update in registration table.';
+                    break;
+                case 17:
+                    retVal.Message = 'Error occurred during license status update.';
                     break;
                 default:
                     retVal.Result = result;

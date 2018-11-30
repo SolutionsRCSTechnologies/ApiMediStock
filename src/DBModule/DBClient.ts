@@ -18,9 +18,12 @@ class DBClientAccess {
             if (url && url.length > 0) {
                 await MongoClient.connect(url, { useNewUrlParser: true }).then(res => {
                     if (res) {
+                        console.log('User DB Created. ' + url);
                         isCreated = true;
                         mClient = res;
                     }
+                }).catch(err => {
+                    console.log(err);
                 });
             }
         } catch (e) {

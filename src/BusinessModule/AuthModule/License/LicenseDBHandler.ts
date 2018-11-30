@@ -118,7 +118,9 @@ class LicenseDBHandler {
                     retVal.Result = result;
                     break;
             }
+            console.log(errorCode);
         } catch (e) {
+            console.log(e);
             throw e;
         } finally {
             if (mClient) {
@@ -252,7 +254,8 @@ class LicenseDBHandler {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.LicenseTypes).findOne({ lictype: licType, active: 'Y' }).then(res => {
+                console.log(licType);
+                await db.collection(MainDBCollection.LicenseTypes).findOne({ licensetype: licType, active: 'Y' }).then(res => {
                     if (res) {
                         result = {
                             type: res.licensetype,
@@ -289,6 +292,7 @@ class LicenseDBHandler {
                     retVal.Result = result;
                     break;
             }
+            console.log(errorCode + " : " + retVal.Message);
         } catch (e) {
             throw e;
         }

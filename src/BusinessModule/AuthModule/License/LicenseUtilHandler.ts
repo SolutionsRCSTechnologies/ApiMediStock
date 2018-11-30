@@ -50,7 +50,7 @@ class LicenseUtilHandler {
             if (!(req.subscriptiontype && req.subscriptiontype.length)) {
                 retVal = false;
             }
-            if (!(req.subscriptionlength && req.subscriptionlength > 0)) {
+            if (!(req.subscriptionlength && !isNaN(req.subscriptionlength) && req.subscriptionlength > 0)) {
                 retVal = false;
             }
             if (!(req.ownerid && req.ownerid.length > 0)) {
@@ -180,10 +180,10 @@ class LicenseUtilHandler {
                 } else {
                     retVal.TotalPrice = 0;
                 }
-                if (req.totalpayablelicamount && req.totalpayablelicamount > 0) {
-                    retVal.TotalPayableLicAmount = req.totalpayablelicamount;
+                if (req.totalpayableamount && req.totalpayableamount > 0) {
+                    retVal.TotalPayableAmount = req.totalpayableamount;
                 } else {
-                    retVal.TotalPayableLicAmount = 0;
+                    retVal.TotalPayableAmount = 0;
                 }
                 if (req.totaldiscountamount && req.totaldiscountamount > 0) {
                     retVal.TotalDiscountAmount = req.totaldiscountamount;
@@ -272,7 +272,7 @@ class LicenseUtilHandler {
                     subscriptionlength: reqObj.duration,
                     licid: licid,
                     totalprice: totalprice,
-                    totalpayablelicamount: payableAmount,
+                    totalpayableamount: payableAmount,
                     totaldiscountamount: discountedTotal,
                     applydiscountamount: isDiscountAmtApp ? 'Y' : 'N',
                     applydiscountpercentage: isDiscountPerApp ? 'Y' : 'N',
