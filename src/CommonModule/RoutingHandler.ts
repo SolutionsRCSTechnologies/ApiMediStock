@@ -53,13 +53,15 @@ class RoutingMethods{
         return retVal;        
     }
 
-    public async AddUpdateInventorytype(reqData:any[]){
+    public async AddUpdateInventorytype(reqData:any){
         console.log(100);
+        console.log(reqData);
         let retVal:any;
         try{
             retVal = await inventoryHandle.AddUpdateInventorytype(reqData);
         }
         catch(e){
+            console.log(e);
             throw e;
         }
         return retVal;        
@@ -79,7 +81,9 @@ class RoutingMethods{
     public async inventorytypelist(listObj:any){
         let retVal:any;
         try{
+            console.log(1);
             retVal = await inventoryHandle.GetInventoryTypeList(listObj);
+            console.log(2);
         }
         catch(e){
             throw e;

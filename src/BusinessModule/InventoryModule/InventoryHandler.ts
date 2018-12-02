@@ -22,6 +22,7 @@ class InventoryHandler{
     let insertedObj:any[];
     console.log(10);
     if(reqData){
+    console.dir(reqData);
      let config = DBConfig;
      config.UserDBName = "MediStockDB";
      try{
@@ -42,7 +43,9 @@ class InventoryHandler{
 
     if(updatedObj.length > 0){
       await InventoryDBHandle.UpdateInventoryTypeList(updatedObj, config).then(obj=>{
-        retVal = obj;
+        console.log('obj');
+        console.log(obj);
+        retVal = retVal + "</br> " + obj;
       }).catch(err=>{
         throw err;
       });
@@ -67,12 +70,19 @@ class InventoryHandler{
     if(listObj){
      let config = DBConfig;
      config.UserDBName = "MediStockDB";
-     await InventoryDBHandle.GetInventoryTypeList(listObj, config).then(obj=>{
-       retVal = obj;
-     }).catch(err=>{
-       throw err;
-     });
+    //  await InventoryDBHandle.GetInventoryTypeList(listObj, config).then(obj=>{
+    //    retVal = obj;
+    //  }).catch(err=>{
+    //    throw err;
+    //  });
+    retVal = await InventoryDBHandle.GetInventoryTypeList(listObj, config);
     }
+    console.log('retVal');
+    console.log(retVal);
+    retVal.res.forEach(item => {
+        item.CreatedFlag = 'N';
+        item.editedFlag = 'N';
+    });
     return retVal;
 }
 

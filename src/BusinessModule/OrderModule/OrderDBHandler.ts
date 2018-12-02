@@ -16,10 +16,12 @@ class OrderDBHandler{
                 let db:Db = await mClient.db(config.UserDBName);
                 await db.collection("Orders").find({}).toArray().then(arr=>{
                     retVal = arr;
+                    console.log(1);
                 })
                 .catch(err=>{
                     throw err;
                 });
+                console.log(2);
             }
         }
         catch(e){

@@ -18,7 +18,7 @@ class AppRouter{
         let allowedH:string|undefined = ServerConfig.AllowedHeaders;
         let allowedO:string|undefined = ServerConfig.AllowedOrigins;
         this.exp.use((req, res, next)=>{
-            res.header("AccessAccess-Control-Allow-Headers", allowedH);
+            res.header("Access-Control-Allow-Headers", allowedH);
             res.header("Access-Control-Allow-Methods",allowedM);
             res.header("Access-Control-Allow-Origin",allowedO);
 
@@ -31,6 +31,7 @@ class AppRouter{
         this.SetAppRouting(this.exp);
     }
     SetAppRouting(app:express.Express){
+        app.use(bodyParser.json());
         if(app){
             let allRoutes = RoutingHandler;
             if(allRoutes && allRoutes.length>0){
@@ -53,9 +54,16 @@ class AppRouter{
                             break;
                             case "1":
                                 app.post(route.url, (req, res)=>{
+                                    console.dir(req.body);
+                                    //console.dir(JSON.parse(req));
                                     let reqData = req.body;
+                                    console.log(reqData);
                                     //let reqObj = JSON.parse(reqData);
                                     route.handler(reqData).then((obj)=>{
+                                        //console.log(res);
+                                        console.log('obj');
+                                        console.log(obj);
+                                        console.log('obj2');
                                         Util.SendResponse(res, obj);
                                         res.end();
                                     })
