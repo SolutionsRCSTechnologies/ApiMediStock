@@ -60,17 +60,38 @@ class LicenseOpHandler {
         let output: MethodResponse = new MethodResponse();
         try {
             if (userName && userName.length > 0) {
-                let dbName: string = await this.GetUserDBName(userName);
-                let isDBCreated: boolean = await LicenseDBHandle.CreateUserDB(dbName);
+                let dbName: string = '';// await this.GetUserDBName(userName);
+                let dbUrl: string = '';
+                let isDBCreated: boolean = false; //await LicenseDBHandle.CreateUserDB(dbName);
+                output = await LicenseDBHandle.AssignUserDB(userName, licId);
+                //isDBCreated = output && output.ErrorCode == 0 && output.Result;
+                if (output && output.ErrorCode == 0 && output.Result) {
+                    isDBCreated = true;
+                    dbName = output.Result.dbname;
+                    dbUrl = output.Result.dburl;
+                }
+                console.log(output.Result);
+                console.log(100);
                 if (isDBCreated) {
+                    console.log(101);
                     //First Update UserDB name in Registration table. set collection creation completed as false.
-                    output = await LicenseDBHandle.UpdateUserDBNameInLicense(licId, userName, dbName);
-                    output = await RegistrationOpHandle.UpdateUserDBName(userName, licId, dbName);
+                    output = await LicenseDBHandle.UpdateUserDBNameInLicense(licId, userName, dbName, dbUrl);
+                    console.log('Error Code: ' + output.ErrorCode);
+                    console.log(102);
+                    output = await RegistrationOpHandle.UpdateUserDBName(userName, licId, dbName, dbUrl);
+                    console.log('Error Code: ' + output.ErrorCode);
+                    console.log(103);
                     output = await RegistrationOpHandle.UpdateCollectionCreationStatus(userName, licId, 'START');
+                    console.log('Error Code: ' + output.ErrorCode);
+                    console.log(104);
                     //Create userDB collections creation.
                     output = await LicenseDBHandle.CreateCollections(userName, licId);
+                    console.log('Error Code: ' + output.ErrorCode);
+                    console.log(105);
                     //Set collection creation completed as true.
                     output = await RegistrationOpHandle.UpdateCollectionCreationStatus(userName, licId, 'DONE');
+                    console.log('Error Code: ' + output.ErrorCode);
+                    console.log(106);
                     isProcessDone = true;
                 } else {
                     isProcessDone = false;

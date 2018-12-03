@@ -530,7 +530,7 @@ class RegistrationDBHandler {
         return retVal;
     }
 
-    async UpdateUserDBName(ownerid: string, licid: string, dbName: string) {
+    async UpdateUserDBName(ownerid: string, licid: string, dbName: string, dbUrl: string) {
         let retVal: MethodResponse = new MethodResponse();
         let mClient: MongoClient = null;
         try {
@@ -539,7 +539,7 @@ class RegistrationDBHandler {
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
                 await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerid, licid: licid, active: 'Y', licensed: 'Y' },
-                    { $set: { userdbname: dbName } }).then(res => {
+                    { $set: { userdbname: dbName, userdburl: dbUrl } }).then(res => {
                         if (res && res.value) {
                             console.log('Status updated');
                         }

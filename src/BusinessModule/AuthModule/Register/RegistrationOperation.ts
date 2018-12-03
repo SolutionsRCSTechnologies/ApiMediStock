@@ -272,12 +272,13 @@ class RegistrationOperations {
         return retVal;
     }
 
-    async UpdateUserDBName(ownerId: string, licId: string, userDBName: string) {
+    async UpdateUserDBName(ownerId: string, licId: string, userDBName: string, dbUrl?: string) {
         let retVal: MethodResponse = new MethodResponse();
         try {
             if (ownerId && licId && ownerId.length > 0 && licId.length > 0) {
                 if (userDBName && userDBName.length > 0) {
-                    retVal = await RegistrationDBHandle.UpdateUserDBName(ownerId, licId, userDBName);
+                    dbUrl = dbUrl && dbUrl.length > 0 ? dbUrl : '';
+                    retVal = await RegistrationDBHandle.UpdateUserDBName(ownerId, licId, userDBName, dbUrl);
                 } else {
                     retVal.ErrorCode = 2;
                     retVal.Message = 'User DataBase name is empty.';

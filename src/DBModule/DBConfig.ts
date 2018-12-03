@@ -35,7 +35,8 @@ export const MainDBCollection = {
     LicenseTypes: "LicenseTypes",
     Registrations: "Registrations",
     PaymentDetails: "PaymentDetails",
-    LicensePurchase: "LicensePurchase"
+    LicensePurchase: "LicensePurchase",
+    UserDBCollection: "UserDBCollection"
 };
 
 export const UserDBCollectionArr = [

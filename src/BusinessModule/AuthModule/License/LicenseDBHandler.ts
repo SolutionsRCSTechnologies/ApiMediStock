@@ -41,17 +41,93 @@ class LicenseDBHandler {
         return isValid;
     }
 
-    async CreateUserDB(dbName: string) {
-        let isCreated: boolean = false;
+    // async CreateUserDB(dbName: string) {
+    //     let isCreated: boolean = false;
+    //     try {
+    //         if (dbName && dbName.length > 0) {
+    //             let url: string = DBConfig.UserDBUrl + '/' + dbName;
+    //             isCreated = await DBClient.CreateUserDB(url);
+    //         }
+    //     } catch (e) {
+    //         throw e;
+    //     }
+    //     return isCreated;
+    // }
+
+    async AssignUserDB(ownerId: string, licId: string) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        let errorCode: number = 0;
+        let result: any = null;
         try {
-            if (dbName && dbName.length > 0) {
-                let url: string = DBConfig.UserDBUrl + '/' + dbName;
-                isCreated = await DBClient.CreateUserDB(url);
+            if (ownerId && ownerId.length > 0 && licId && licId.length > 0) {
+                let config = DBConfig;
+                mClient = await DBClient.GetMongoClient(config);
+                let db: Db = await mClient.db(config.MainDBName);
+                let dbName: string = '';
+                let dbUrl: string = '';
+                let id: any = null;
+                await db.collection(MainDBCollection.UserDBCollection).find({ assigned: 'N', active: 'Y' }).sort('createddate', 1).toArray().then(res => {
+                    if (res && res.length > 0 && res[0] != null) {
+                        dbName = res[0].dbname;
+                        dbUrl = res[0].dburl;
+                        id = res[0]._id;
+                    } else {
+                        errorCode = 2;
+                    }
+                }).catch(err => {
+                    throw err;
+                });
+                console.log("id: " + id + ", dbname: " + dbName + ", dburl: " + dbUrl);
+                if (errorCode == 0 && id && dbName.length > 0 && dbUrl.length > 0) {
+                    await db.collection(MainDBCollection.UserDBCollection).findOneAndUpdate({ _id: id },
+                        { $set: { ownerid: ownerId, licid: licId, assigned: 'Y' } }).then(res => {
+                            if (res.ok == 1) {
+                                result = {
+                                    dbname: dbName,
+                                    dburl: dbUrl,
+                                    ownerid: ownerId,
+                                    licid: licId
+                                };
+                            } else {
+                                errorCode = 4;
+                            }
+                        }).catch(err => {
+                            throw err;
+                        });
+                } else {
+                    errorCode = errorCode > 0 ? errorCode : 3;
+                }
+            } else {
+                errorCode = 1;
             }
+            retVal.ErrorCode = errorCode;
+            switch (errorCode) {
+                case 1:
+                    retVal.Message = 'Owner id or license id is empty.';
+                    break;
+                case 2:
+                    retVal.Message = 'No database is available to assign the owner.';
+                    break;
+                case 3:
+                    retVal.Message = 'Some error found in database name or url.';
+                    break;
+                case 4:
+                    retVal.Message = 'Some error occurred during assignment of the database to the owner.';
+                    break;
+                default:
+                    retVal.Result = result;
+                    break;
+            }
+            console.log(retVal.Message);
         } catch (e) {
             throw e;
+        } finally {
+            if (mClient) {
+                mClient.close();
+            }
         }
-        return isCreated;
+        return retVal;
     }
 
     async CreateCollections(ownerId: string, licId: string) {
@@ -354,12 +430,13 @@ class LicenseDBHandler {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.Licenses).findOneAndUpdate({ licid: licId, ownerid: ownerId, userdb: '', dbcreated: 'N' },
+                await db.collection(MainDBCollection.Licenses).findOneAndUpdate({ licid: licId, ownerid: ownerId, dbcreated: 'N' },
                     { $set: { dbcreated: 'Y', userdb: dbName, userdburl: dbUrl } }).then(res => {
-                        if (!res.lastErrorObject) {
+                        if (res.ok == 1) {
                             result = true;
                         } else {
                             errorCode = 2;
+                            console.log(res.lastErrorObject);
                         }
                     }).catch(err => {
                         throw err;
