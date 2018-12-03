@@ -166,11 +166,11 @@ class RegistrationOperations {
         return isValid;
     }
 
-    async RegistrationProcess(reqData) {
+    async RegistrationProcess(body: any, header?: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            if (reqData && reqData.content) {
-                let content = reqData.content;
+            if (body) {
+                let content = body;
                 console.log(1);
                 //Validate request data
                 if (await this.ValidateRequest(content)) {
@@ -235,11 +235,11 @@ class RegistrationOperations {
         return isValid;
     }
 
-    async ActivateUser(reqData) {
+    async ActivateUser(header: any, body: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            if (reqData && reqData.content) {
-                let content = reqData.content;
+            if (header) {
+                let content = body;
                 //Validate request
                 if (await this.ValidateActivateUserRequest(content)) {
                     if (content.ownerid) {

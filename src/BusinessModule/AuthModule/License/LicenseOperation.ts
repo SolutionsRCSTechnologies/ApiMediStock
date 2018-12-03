@@ -105,22 +105,23 @@ class LicenseOpHandler {
         return isProcessDone;
     }
 
-    async RegisterLicense(req: any) {
+    async RegisterLicense(header: any, body: any) {
         let retVal: MethodResponse = new MethodResponse();
         let output: MethodResponse = new MethodResponse();
         let errorCode: number = 0;
         let result: any = null;
         try {
-            let isValid: boolean = await LicenseUtilHandle.ValidateLicRegistrationReq(req);
+            //TBD: Validate header
+            let isValid: boolean = await LicenseUtilHandle.ValidateLicRegistrationReq(body);
             if (isValid) {
                 //Check for existing Registration and DataBase
                 let licId: string = '';
-                let licType: string = req.lictype;
+                let licType: string = body.lictype;
                 let isLicensed: boolean = false;
                 let maxusercount: number = 0;
                 let isDBExist: boolean = false;
 
-                output = await RegistrationOpHandle.GetOwnerRegistrationInfo(req.ownerid);
+                output = await RegistrationOpHandle.GetOwnerRegistrationInfo(body.ownerid);
                 if (output && output.Result && output.ErrorCode == 0) {
                     licId = output.Result.licid;
                     isLicensed = output.Result.licensed == 'Y';
@@ -140,7 +141,7 @@ class LicenseOpHandler {
                             if (result.pendingamount > 0) {
                                 errorCode = 3;
                             } else if (result.expiredate >= currentDate) {
-                                let modifyIfAny: boolean = req.modifyifany && req.modifyifany == 'Y';
+                                let modifyIfAny: boolean = body.modifyifany && body.modifyifany == 'Y';
                                 if (modifyIfAny) {
                                     //Inactive existing license
                                     output = null;
@@ -166,12 +167,12 @@ class LicenseOpHandler {
                     if (isNewLicense && errorCode == 0) {
                         //Get License Type info
                         output = null;
-                        licType = req.lictype;
+                        licType = body.lictype;
                         output = await LicenseDBHandle.GetLicenseTypeInfo(licType);
                         let startDt: Date = new Date();
                         let endDt: Date = new Date();
-                        if (req.licstartdt && isDate(req.licstartdt)) {
-                            startDt = req.licstartdt;
+                        if (body.licstartdt && isDate(body.licstartdt)) {
+                            startDt = body.licstartdt;
                         }
                         if (output && output.ErrorCode == 0 && output.Result) {
                             let typeResult = output.Result;
@@ -188,12 +189,12 @@ class LicenseOpHandler {
                             if (typeResult.paymentclearlengthindays && typeResult.paymentclearlengthindays > 0) {
                                 paymentClearLengthInDays = typeResult.paymentclearlengthindays;
                             }
-                            if (req.subscriptionlength && req.subscriptionlength > 0) {
-                                duration = req.subscriptionlength;
+                            if (body.subscriptionlength && body.subscriptionlength > 0) {
+                                duration = body.subscriptionlength;
                             }
                             if (duration >= minDuration) {
-                                if (req.subscriptiontype && req.subscriptiontype > 0) {
-                                    subsType = req.subscriptiontype.trim().toUpperCase();
+                                if (body.subscriptiontype && body.subscriptiontype > 0) {
+                                    subsType = body.subscriptiontype.trim().toUpperCase();
                                     switch (subsType) {
                                         case 'DAILY':
                                             if (isDaily) {
@@ -228,11 +229,11 @@ class LicenseOpHandler {
                                 errorCode = 14;
                             }
                             if (errorCode == 0) {
-                                let paymentOption: any = req.paymentdetail ? req.paymentdetail : null;
+                                let paymentOption: any = body.paymentdetail ? body.paymentdetail : null;
                                 let reqObj: any = {
                                     lictype: typeResult.type,
                                     maxusers: typeResult.maxusers,
-                                    ownerid: req.ownerid,
+                                    ownerid: body.ownerid,
                                     licstartdate: startDt,
                                     licenddate: endDt,
                                     substype: subsType,
@@ -259,14 +260,14 @@ class LicenseOpHandler {
                                     if (output && output.ErrorCode == 0 && output.Result) {
                                         //update license id in existing registration info
                                         output = null;
-                                        output = await RegistrationOpHandle.UpdateLicenseIdInRegistration(req.ownerid, licId);
+                                        output = await RegistrationOpHandle.UpdateLicenseIdInRegistration(body.ownerid, licId);
                                         if (output && output.ErrorCode == 0 && output.Result) {
                                             output = null;
-                                            output = await RegistrationOpHandle.UpdateLicenseStatus(req.ownerid, licId, true);
+                                            output = await RegistrationOpHandle.UpdateLicenseStatus(body.ownerid, licId, true);
                                             if (output && output.ErrorCode == 0 && output.Result) {
                                                 if (!isDBExist) {
                                                     //Extend existing registraion information
-                                                    if (await this.CreateUserDB(req.ownerid, licId)) {
+                                                    if (await this.CreateUserDB(body.ownerid, licId)) {
                                                         result = 'License registration is completed successfully.'
                                                     } else {
                                                         result = 'License registration is successful but some error occurred during user database creation.';

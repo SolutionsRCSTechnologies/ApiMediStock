@@ -90,47 +90,60 @@ export class RequestEntity {
 
 
 export class ResponseHeader {
-    private _username: string;
-    private _password: string;
-    private _sessionid: string;
+    private message: string;
+    private errorcode: number;
+    private sessionid: string;
+    private elapsedto: Date = new Date();
 
-    public get UserName(): string {
-        return this._username;
-    }
-    public set UserName(val) {
-        this._username = val;
+    constructor() {
+        this.elapsedto.setDate(4);
     }
 
-    public get Password(): string {
-        return this._password;
+    public get Message(): string {
+        return this.message;
     }
-    public set Password(val) {
-        this._password = val;
+    public set Message(val) {
+        this.message = val;
     }
-
     public get SessionId(): string {
-        return this._sessionid;
+        return this.sessionid;
     }
     public set SessionId(val) {
-        this._sessionid = val;
+        this.sessionid = val;
+    }
+    public get ErrorCode(): number {
+        return this.errorcode;
+    }
+    public set ErrorCode(val) {
+        this.errorcode = val;
+    }
+    public get ElapsedTo(): Date {
+        return this.elapsedto;
+    }
+    public set ElapsedTo(val) {
+        this.elapsedto = val;
     }
 }
 
 export class ResponseEntity {
-    private _header: ResponseHeader = new ResponseHeader();
-    private _body: any = null;
+    private header: ResponseHeader = null;
+    private body: any = null;
+
+    constructor() {
+        this.header = new ResponseHeader();
+    }
 
     public get Header(): ResponseHeader {
-        return this._header;
+        return this.header;
     }
     public set Header(val) {
-        this._header = val;
+        this.header = val;
     }
     public get Body(): any {
-        return this._body;
+        return this.body;
     }
     public set Body(val) {
-        this._body = val;
+        this.body = val;
     }
 }
 
@@ -138,7 +151,21 @@ export class MethodResponse {
     private errorcode: number = 0;
     private message: string = '';
     private result: any = null;
+    private elapsedto: Date;
+    private sessionid: string;
 
+    public get SessionId(): string {
+        return this.sessionid;
+    }
+    public set SessionId(val) {
+        this.sessionid = val;
+    }
+    public get ElapsedTo(): Date {
+        return this.elapsedto;
+    }
+    public set ElapsedTo(val) {
+        this.elapsedto = val;
+    }
     public get ErrorCode(): number {
         return this.errorcode;
     }

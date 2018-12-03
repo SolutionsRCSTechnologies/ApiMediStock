@@ -3,6 +3,7 @@ import { RegistrationHandle } from '../BusinessModule/AuthModule/Register/Regist
 import { OrderHandle } from '../BusinessModule/OrderModule/OrderHandler';
 import { Util } from './UtilHandler';
 import { LicenseHandle } from '../BusinessModule/AuthModule/License/LicenseHandler';
+import { MethodResponse } from './Entities';
 
 
 enum APIMethodType {
@@ -11,9 +12,16 @@ enum APIMethodType {
 
 class RoutingMethods {
     public async ActivateUser(reqData: any) {
-        let retVal: any;
+        let retVal: MethodResponse = new MethodResponse();
         try {
-            retVal = await RegistrationHandle.ActivateUser(reqData);
+            if (await Util.ValidateRequsetStructure(reqData)) {
+                let header: any = reqData.header;
+                let body: any = reqData.body;
+                retVal = await RegistrationHandle.ActivateUser(header, body);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Invalid request.';
+            }
         }
         catch (e) {
             throw e;
@@ -21,9 +29,16 @@ class RoutingMethods {
         return retVal;
     }
     public async Login(reqData: any) {
-        let retVal: any;
+        let retVal: MethodResponse = new MethodResponse();
         try {
-            retVal = await LoginHandle.Login(reqData);
+            if (await Util.ValidateRequsetStructure(reqData)) {
+                let header: any = reqData.header;
+                let body: any = reqData.body;
+                retVal = await LoginHandle.Login(header, body);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Invalid request.';
+            }
         }
         catch (e) {
             throw e;
@@ -31,9 +46,16 @@ class RoutingMethods {
         return retVal;
     }
     public async Register(reqData: any) {
-        let retVal: any;
+        let retVal: MethodResponse = new MethodResponse();
         try {
-            retVal = await RegistrationHandle.Register(reqData);
+            if (await Util.ValidateRequsetStructure(reqData)) {
+                let header: any = reqData.header;
+                let body: any = reqData.body;
+                retVal = await RegistrationHandle.Register(header, body);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Invalid request.';
+            }
         }
         catch (e) {
             throw e;
@@ -41,9 +63,16 @@ class RoutingMethods {
         return retVal;
     }
     public async GetOrderList(reqData: any) {
-        let retVal: any;
+        let retVal: MethodResponse = new MethodResponse();
         try {
-            retVal = await OrderHandle.GetOrderList(reqData);
+            if (await Util.ValidateRequsetStructure(reqData)) {
+                let header: any = reqData.header;
+                let body: any = reqData.body;
+                retVal = await OrderHandle.GetOrderList(header, body);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Invalid request.';
+            }
         }
         catch (e) {
             throw e;
@@ -52,9 +81,16 @@ class RoutingMethods {
     }
 
     public async RegisterLicense(reqData: any) {
-        let retVal: any;
+        let retVal: MethodResponse = new MethodResponse();
         try {
-            retVal = await LicenseHandle.RegisterLicense(reqData);
+            if (await Util.ValidateRequsetStructure(reqData)) {
+                let header: any = reqData.header;
+                let body: any = reqData.body;
+                retVal = await LicenseHandle.RegisterLicense(header, body);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Invalid request.';
+            }
         } catch (e) {
             throw e;
         }

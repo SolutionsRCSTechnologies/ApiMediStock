@@ -2,11 +2,11 @@ import { RegistrationOpHandle } from './RegistrationOperation';
 import { MethodResponse } from '../../../CommonModule/Entities';
 
 class RegistrationHandler {
-    async Register(reqData: any) {
+    async Register(header: any, body: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            if (reqData) {
-                retVal = await RegistrationOpHandle.RegistrationProcess(reqData);
+            if (header && body) {
+                retVal = await RegistrationOpHandle.RegistrationProcess(body, header);
             } else {
                 retVal.ErrorCode = 1;
                 retVal.Message = 'Request body cannot be null or empty.';
@@ -17,11 +17,11 @@ class RegistrationHandler {
         return retVal;
     }
 
-    async ActivateUser(reqData: any) {
+    async ActivateUser(header: any, body: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            if (reqData) {
-                retVal = await RegistrationOpHandle.ActivateUser(reqData);
+            if (header) {
+                retVal = await RegistrationOpHandle.ActivateUser(header, body);
             } else {
                 retVal.ErrorCode = 1;
                 retVal.Message = 'Request body cannot be null or empty.';

@@ -14,10 +14,10 @@ class LicenseHandler {
         return isValid;
     }
 
-    async RegisterLicense(req: any) {
+    async RegisterLicense(header: any, body: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            retVal = await LicenseOpHandle.RegisterLicense(req);
+            retVal = await LicenseOpHandle.RegisterLicense(header, body);
         } catch (e) {
             throw e;
         }

@@ -3,12 +3,11 @@ import { MethodResponse } from '../../../CommonModule/Entities';
 
 class LoginHandler {
 
-    async Login(reqData) {
+    async Login(header: any, body?: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            if (reqData && reqData.content) {
-                let content = reqData.content;
-                retVal = await LoginOpHandle.LoginProcess(content);
+            if (header) {
+                retVal = await LoginOpHandle.LoginProcess(header);
             } else {
                 retVal.ErrorCode = 1;
                 retVal.Message = "Empty login request.";
