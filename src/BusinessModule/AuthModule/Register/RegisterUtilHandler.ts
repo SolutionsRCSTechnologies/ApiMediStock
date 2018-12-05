@@ -275,6 +275,92 @@ class RegisterUtilHandler {
         }
         return retVal;
     }
+
+    async ValidateRequest(req) {
+        let isValid: boolean = true;
+        try {
+            if (req) {
+                if (!(req.registrationtype && (req.registrationtype == 'OWNER' || req.registrationtype == 'USER'))) {
+                    isValid = false;
+                }
+                if (req.registrationtype && req.registrationtype.trim().length > 0) {
+                    switch (req.registrationtype.trim().toUpperCase()) {
+                        case 'OWNER':
+                            if (isValid && !(req.ownerid && req.password && req.emailid && req.ownerfirstname && req.mobileno && req.druglicense && req.shopname && req.address && req.country)) {
+                                isValid = false;
+                            }
+                            break;
+                        case 'USER':
+                            if (isValid && !req.ownerid) {
+                                isValid = false;
+                            }
+                            break;
+                    }
+                }
+                if (isValid && req.users && req.users.length > 0) {
+
+                    for (let i = 0; i < req.users.length; i++) {
+                        let ele = req.users[i];
+                        if (ele) {
+                            if (isValid && !(ele.firstname && ele.userid && ele.password && ele.address && ele.mobileno && ele.emailid)) {
+                                isValid = false;
+                            }
+                        } else {
+                            isValid = false;
+                        }
+                    }
+
+                    // req.users.foreach(ele => {
+                    //     if (ele) {
+                    //         if (isValid && !(ele.firstname && ele.userid && ele.password && ele.address && ele.mobileno && ele.emailid)) {
+                    //             isValid = false;
+                    //             console.log(2);
+                    //         }
+                    //     } else {
+                    //         isValid = false;
+                    //     }
+                    // });
+                }
+            } else {
+                isValid = false;
+            }
+        } catch (e) {
+            console.log(e);
+            isValid = false;
+        }
+        return isValid;
+    }
+
+    async ValidateActivateUserRequest(req) {
+        let isValid: boolean = true;
+        try {
+            if (req) {
+                if (!req.ownerid) {
+                    isValid = false;
+                }
+                if (!req.userid) {
+                    if (req.users && req.users.length > 0) {
+                        req.users.forEach(user => {
+                            if (user) {
+                                if (isValid && !(user.firstname && user.userid && user.password && user.address && user.mobileno && user.emailid)) {
+                                    isValid = false;
+                                }
+                            } else {
+                                isValid = false;
+                            }
+                        });
+                    } else {
+                        isValid = false;
+                    }
+                }
+            } else {
+                isValid = false;
+            }
+        } catch (e) {
+            throw e;
+        }
+        return isValid;
+    }
 }
 
 export let RegisterUtilHandle = new RegisterUtilHandler();

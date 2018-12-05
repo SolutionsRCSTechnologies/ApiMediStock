@@ -720,6 +720,7 @@ export class ActiveSession {
     private username: string;
     private ownerrefid: string;
     private active: string;
+    private userrole: string;
 
     constructor() {
         let timestr = new Date().toTimeString();
@@ -732,6 +733,12 @@ export class ActiveSession {
         });
     }
 
+    public get UserRole(): string {
+        return this.userrole;
+    }
+    public set UserRole(val) {
+        this.userrole = val;
+    }
     public get Active(): string {
         return this.active;
     }

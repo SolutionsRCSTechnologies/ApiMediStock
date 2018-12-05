@@ -19,9 +19,19 @@ class LoginHandler {
     }
 
     async ValidateHeader(header: any) {
-        let retVal: MethodResponse = null;
+        let retVal: MethodResponse = new MethodResponse();
         try {
             retVal = await LoginOpHandle.ValidateHeader(header);
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
+
+    async Logout(header: any, body?: any) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            retVal = await LoginHandle.Logout(header, body);
         } catch (e) {
             throw e;
         }

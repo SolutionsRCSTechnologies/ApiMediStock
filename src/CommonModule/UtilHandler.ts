@@ -10,6 +10,9 @@ class Utilies {
             retVal.Header.Message = obj.Message;
             retVal.Header.SessionId = obj.SessionId;
             retVal.Header.ElapsedTo = obj.ElapsedTo;
+            retVal.Header.UserName = obj.UserName;
+            retVal.Header.UserType = obj.UserType;
+            retVal.Header.UserRole = obj.UserRole;
             retVal.Body = obj.Result;
             res.writeHead(200, { "Content-Type": "application/json" });
             res.write(JSON.stringify(retVal));

@@ -1,40 +1,14 @@
 import { LoginDBHandle } from './LoginDBHandler';
 import { MethodResponse } from '../../../CommonModule/Entities';
+import { LoginUtilHandle } from './LoginUtilHandler';
 
 class LoginOperations {
-    async ValidateLoginRequest(reqData: any) {
-        let isValid = true;
-        if (reqData) {
-            if (!(reqData.userid && reqData.userid.length > 0)) {
-                isValid = false;
-            }
-            if (!(reqData.password && reqData.password.length > 0)) {
-                isValid = false;
-            }
-        } else {
-            isValid = false;
-        }
-        return isValid;
-    }
-
-    async ValidateHeaderRequest(header: any) {
-        let isValid = true;
-        if (header) {
-            if (!(header.sessionid && header.sessionid.length > 0)) {
-                isValid = false;
-            }
-        } else {
-            isValid = false;
-        }
-        return isValid;
-    }
-
-    async LoginProcess(req) {
+    async LoginProcess(header: any, body?: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            if (req) {
-                if (await this.ValidateLoginRequest(req)) {
-                    retVal = await LoginDBHandle.ValidateLogin(req);
+            if (header) {
+                if (await LoginUtilHandle.ValidateLoginRequest(header)) {
+                    retVal = await LoginDBHandle.Login(header);
                 } else {
                     retVal.ErrorCode = 2;
                     retVal.Message = "Login request is not valid.";
@@ -53,7 +27,7 @@ class LoginOperations {
         let retVal: MethodResponse = new MethodResponse();
         try {
             if (header) {
-                if (await this.ValidateHeader(header)) {
+                if (await LoginUtilHandle.ValidateHeaderRequest(header)) {
                     retVal = await LoginDBHandle.ValidateHeader(header);
                 } else {
                     retVal.ErrorCode = 2;
@@ -62,6 +36,28 @@ class LoginOperations {
             } else {
                 retVal.ErrorCode = 1;
                 retVal.Message = 'The header is empty.';
+            }
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
+
+    async Logout(header: any, body?: any) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (header) {
+                if (await LoginUtilHandle.ValidateLogoutRequest(header)) {
+                    let userId: string = header.userid;
+                    let sessionId: string = header.sessionid;
+                    retVal = await LoginDBHandle.Logout(userId, sessionId);
+                } else {
+                    retVal.ErrorCode = 2;
+                    retVal.Message = "Login request is not valid.";
+                }
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = "Login request is empty, cannot validated.";
             }
         } catch (e) {
             throw e;

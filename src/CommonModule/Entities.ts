@@ -94,11 +94,32 @@ export class ResponseHeader {
     private errorcode: number;
     private sessionid: string;
     private elapsedto: Date = new Date();
+    private username: string;
+    private usertype: string;
+    private userrole: string;
 
     constructor() {
         this.elapsedto.setDate(4);
     }
 
+    public get UserRole(): string {
+        return this.userrole;
+    }
+    public set UserRole(val) {
+        this.userrole = val;
+    }
+    public get UserType(): string {
+        return this.usertype;
+    }
+    public set UserType(val) {
+        this.usertype = val;
+    }
+    public get UserName(): string {
+        return this.username;
+    }
+    public set UserName(val) {
+        this.username = val;
+    }
     public get Message(): string {
         return this.message;
     }
@@ -152,8 +173,29 @@ export class MethodResponse {
     private message: string = '';
     private result: any = null;
     private elapsedto: Date;
-    private sessionid: string;
+    private sessionid: string = '';
+    private username: string = '';
+    private usertype: string;
+    private userrole: string;
 
+    public get UserRole(): string {
+        return this.userrole;
+    }
+    public set UserRole(val) {
+        this.userrole = val;
+    }
+    public get UserType(): string {
+        return this.usertype;
+    }
+    public set UserType(val) {
+        this.usertype = val;
+    }
+    public get UserName(): string {
+        return this.username;
+    }
+    public set UserName(val) {
+        this.username = val;
+    }
     public get SessionId(): string {
         return this.sessionid;
     }

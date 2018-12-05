@@ -64,6 +64,51 @@ class LoginUtilHandler {
         }
         return item;
     }
+
+    async ValidateHeaderRequest(header: any) {
+        let isValid = true;
+        if (header) {
+            if (!(header.userid && header.userid.length > 0)) {
+                isValid = false;
+            }
+            if (!(header.sessionid && header.sessionid.length > 0)) {
+                isValid = false;
+            }
+        } else {
+            isValid = false;
+        }
+        return isValid;
+    }
+
+    async ValidateLoginRequest(reqData: any) {
+        let isValid = true;
+        if (reqData) {
+            if (!(reqData.userid && reqData.userid.length > 0)) {
+                isValid = false;
+            }
+            if (!(reqData.password && reqData.password.length > 0)) {
+                isValid = false;
+            }
+        } else {
+            isValid = false;
+        }
+        return isValid;
+    }
+
+    async ValidateLogoutRequest(reqData: any) {
+        let isValid = true;
+        if (reqData) {
+            if (!(reqData.userid && reqData.userid.length > 0)) {
+                isValid = false;
+            }
+            if (!(reqData.sessionid && reqData.sessionid.length > 0)) {
+                isValid = false;
+            }
+        } else {
+            isValid = false;
+        }
+        return isValid;
+    }
 }
 
 export let LoginUtilHandle = new LoginUtilHandler();

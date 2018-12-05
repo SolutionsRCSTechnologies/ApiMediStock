@@ -30,6 +30,7 @@ class LicenseDBHandler {
                 }).catch(err => {
                     throw err;
                 });
+                //TBD: Check for license expiry in License purchase table.
             }
         } catch (e) {
             throw e;

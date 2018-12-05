@@ -45,6 +45,23 @@ class RoutingMethods {
         }
         return retVal;
     }
+    public async Logout(reqData: any) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (await Util.ValidateRequsetStructure(reqData)) {
+                let header: any = reqData.header;
+                let body: any = reqData.body;
+                retVal = await LoginHandle.Logout(header, body);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Invalid request.';
+            }
+        }
+        catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
     public async Register(reqData: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
@@ -116,7 +133,12 @@ export const RoutingHandler = [
         handler: new RoutingMethods().Login,
         method: APIMethodType.POST,
         name: "Login Api"
-
+    },
+    {
+        url: "/auth/logout",
+        handler: new RoutingMethods().Logout,
+        method: APIMethodType.POST,
+        name: "Logout Api"
     },
     {
         url: "/auth/register",
