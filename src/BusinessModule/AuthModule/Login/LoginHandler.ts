@@ -35,6 +35,7 @@ class LoginHandler{
             }
         }
         catch(e){
+            console.log(e);
             throw e;
         }
         return retVal;
