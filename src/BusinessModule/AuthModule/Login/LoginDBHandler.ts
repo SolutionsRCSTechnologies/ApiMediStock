@@ -85,7 +85,7 @@ class LoginDBHandler {
                         }).catch(err => {
                             throw err;
                         });
-                        //TBD: Check for active license
+                        //Check for active license
                         let isActiveLicense = await LicenseHandle.ValidateLicense(licid);
                         let isPlaceAvailable = false;
                         let currenttime = new Date();

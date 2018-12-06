@@ -37,6 +37,7 @@ export class LicenseDetail {
     private dbcreated: string = 'N';
     private licstartdate: Date = new Date();
     private licenddate: Date = new Date();
+    private isamountpending: string = 'Y';
     //private licpurcrefid: string;
     private active: string;
     private createdat: Date = new Date();
@@ -55,6 +56,12 @@ export class LicenseDetail {
         });
     }
 
+    public get IsAmountPending(): string {
+        return this.isamountpending;
+    }
+    public set IsAmountPending(val) {
+        this.isamountpending = val;
+    }
     public get DBCreated(): string {
         return this.dbcreated;
     }

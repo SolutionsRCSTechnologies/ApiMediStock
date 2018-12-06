@@ -116,7 +116,6 @@ class RegistrationOperations {
         try {
             if (body) {
                 let content = body;
-                console.log(1);
                 //Validate request data
                 if (await RegisterUtilHandle.ValidateRequest(content)) {
                     let registrationType: string = content.registrationtype;

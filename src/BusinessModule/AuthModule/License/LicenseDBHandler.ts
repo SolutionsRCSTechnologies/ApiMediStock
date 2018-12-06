@@ -13,24 +13,39 @@ class LicenseDBHandler {
         let mClient: MongoClient = null;
         try {
             if (licid) {
+                let isPendingAmount: boolean = true;
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
                 await db.collection(MainDBCollection.Licenses).findOne({ licid: licid, active: 'Y' }).then(res => {
                     if (res) {
-                        let expiredt: number = 0;
-                        let currenttime: number = Date.parse(new Date().toString());
-                        if (res.expireat && isDate(res.expireat)) {
-                            expiredt = Date.parse(res.expireat.toString());
-                        }
-                        if (currenttime < expiredt) {
+                        let currenttime: Date = new Date();
+                        if (isDate(res.licenddate) && currenttime < res.licenddate) {
                             isValid = true;
                         }
+                        isPendingAmount = res.isamountpending && res.isamountpending == 'Y';
                     }
                 }).catch(err => {
                     throw err;
                 });
-                //TBD: Check for license expiry in License purchase table.
+                //Check for license expiry in License purchase table.
+                if (isValid && isPendingAmount) {
+                    await db.collection(MainDBCollection.LicensePurchase).findOne({ licid: licid, active: 'Y' }).then(res => {
+                        if (res) {
+                            let currentDate: Date = new Date();
+                            let totalPendingAmount: number = res.totalpendingamount;
+                            if (totalPendingAmount > 0) {
+                                if (isDate(res.paymentcleardate) && currentDate < res.paymentcleardate) {
+                                    isValid = true;
+                                } else {
+                                    isValid = false;
+                                }
+                            }
+                        }
+                    }).catch(err => {
+                        throw err;
+                    });
+                }
             }
         } catch (e) {
             throw e;
@@ -395,6 +410,20 @@ class LicenseDBHandler {
                 }).catch(err => {
                     throw err;
                 });
+                let isPendingAmount: string = 'Y';
+                if (licObj.TotalPendingAmount > 0) {
+                    isPendingAmount = 'Y';
+                } else {
+                    isPendingAmount = 'N';
+                }
+                await db.collection(MainDBCollection.Licenses).findOneAndUpdate({ licid: licObj.LicId, ownerid: licObj.OwnerId, active: 'Y' },
+                    { $set: { isamountpending: isPendingAmount } }).then(res => {
+                        if (res.ok != 1) {
+                            errorCode = 3;
+                        }
+                    }).catch(err => {
+                        throw err;
+                    });
             } else {
                 errorCode = 1;
             }
@@ -405,6 +434,9 @@ class LicenseDBHandler {
                     break;
                 case 2:
                     retVal.Message = 'License creation is unsuccessfull.';
+                    break;
+                case 3:
+                    retVal.Message = 'License collection update unsuccessfull.';
                     break;
                 default:
                     retVal.Result = result;

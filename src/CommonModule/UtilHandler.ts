@@ -36,7 +36,7 @@ class Utilies {
         return gid;
     }
 
-    async ValidateRequsetStructure(req: any) {
+    async ValidateRequestStructure(req: any) {
         let isValid: boolean = false;
         try {
             if (req) {
@@ -51,6 +51,23 @@ class Utilies {
             throw e;
         }
         return isValid;
+    }
+
+    async SetOutputResponse(inRes: MethodResponse, outRes?: MethodResponse) {
+        try {
+            outRes = outRes ? outRes : new MethodResponse();
+            if (inRes && inRes.Result) {
+                let result = inRes.Result;
+                outRes.ElapsedTo = result.elapsedtime;
+                outRes.SessionId = result.sessionid;
+                outRes.UserName = result.username;
+                outRes.UserRole = result.userrole;
+                outRes.UserType = result.usertype;
+            }
+        } catch (e) {
+            throw e;
+        }
+        return outRes;
     }
 
     // async ShowEndPoints(reqData:any){

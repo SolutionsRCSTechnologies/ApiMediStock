@@ -1,18 +1,17 @@
-import { OrderDBHandle } from './OrderDBHandler';
-import { DBConfig } from '../../DBModule/DBConfig';
+import { OrderOpHandle } from './OrderOperation';
+import { MethodResponse } from '../../CommonModule/Entities';
+import { LicenseHandle } from '../AuthModule/License/LicenseHandler';
+import { LoginHandle } from '../AuthModule/Login/LoginHandler';
+import { Util } from '../../CommonModule/UtilHandler';
 
 class OrderHandler {
   async GetOrderList(header: any, body: any) {
-    let retVal = null;
-    // if (reqData) {
-    //   let config = DBConfig;
-    //   config.UserDBName = "MediStockDB";
-    //   await OrderDBHandle.GetOrderList(reqData, config).then(obj => {
-    //     retVal = obj;
-    //   }).catch(err => {
-    //     throw err;
-    //   });
-    // }
+    let retVal: MethodResponse = new MethodResponse();
+    try {
+      retVal = await OrderOpHandle.GetOrderList(header, body);
+    } catch (e) {
+      throw e;
+    }
     return retVal;
   }
 }

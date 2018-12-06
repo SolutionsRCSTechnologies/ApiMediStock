@@ -21,9 +21,9 @@ class LicenseUtilHandler {
                 if (req.userdb && req.userdb.length > 0) {
                     retVal.UserDB = req.userdb.trim();
                 }
-                // if (req.userdburl && req.userdburl.length > 0) {
-                //     retVal. = req.userdburl.trim();
-                // }
+                if (req.userdburl && req.userdburl.length > 0) {
+                    retVal.UserDBUrl = req.userdburl.trim();
+                }
                 if (req.userdburl && req.userdburl.length > 0) {
                     retVal.UserDBUrl = req.userdburl.trim();
                 }
@@ -32,6 +32,9 @@ class LicenseUtilHandler {
                 }
                 if (req.licenddate && isDate(req.licenddate)) {
                     retVal.LicEndDate = req.licenddate;
+                }
+                if (req.isamountpending && req.isamountpending.length > 0) {
+                    retVal.IsAmountPending = req.isamountpending.trim().toUpperCase();
                 }
                 retVal.Active = 'Y';
             }
@@ -249,7 +252,7 @@ class LicenseUtilHandler {
                     isDiscountPerApp = payment.applydiscountpercentage && payment.applydiscountpercentage.trim().toUpperCase() == 'Y';
                     discountAmt = payment.discountamount && payment.discountamount > 0 ? payment.discountamount : 0;
                     discountPer = payment.discountpercentage && payment.discountpercentage > 0 ? payment.discountpercentage : 0;
-                    lastPaidAmt = payment.paidamount && payment.paidamount > 0 ? payment.paidamount : 0;
+                    lastPaidAmt = (!isNaN(payment.paidamount)) && payment.paidamount > 0 ? payment.paidamount : 0;
 
                     if (isDiscountAmtApp) {
                         discountedTotal = discountAmt;
