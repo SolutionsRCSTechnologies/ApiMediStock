@@ -274,10 +274,10 @@ class RegistrationOperations {
         return retVal;
     }
 
-    async UpdateLicenseIdInRegistration(ownerId: string, licId: string) {
+    async UpdateLicenseIdInRegistration(ownerId: string, licId: string, maxusers?: number) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            retVal = await RegistrationDBHandle.UpdateLicenseIdInRegistration(ownerId, licId);
+            retVal = await RegistrationDBHandle.UpdateLicenseIdInRegistration(ownerId, licId, maxusers);
         } catch (e) {
             throw e;
         }

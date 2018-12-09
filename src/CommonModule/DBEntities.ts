@@ -1,5 +1,6 @@
 import { Long, Double } from 'bson';
 import { Util } from './UtilHandler';
+import * as moment from 'moment';
 
 export class LicenseType {
     private typeid: string;
@@ -730,7 +731,7 @@ export class ActiveSession {
     private userrole: string;
 
     constructor() {
-        let timestr = new Date().toTimeString();
+        let timestr = new Date().getMilliseconds().toPrecision(5);
         Util.GetCustomGuidStr('SESSION', timestr).then(str => {
             this._id = str;
             this.sessionid = str;

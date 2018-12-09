@@ -17,13 +17,17 @@ class LicenseDBHandler {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
+                console.log('licid :' + licid);
                 await db.collection(MainDBCollection.Licenses).findOne({ licid: licid, active: 'Y' }).then(res => {
                     if (res) {
                         let currenttime: Date = new Date();
-                        if (isDate(res.licenddate) && currenttime < res.licenddate) {
-                            isValid = true;
-                        }
+                        isValid = isDate(res.licenddate) && currenttime < res.licenddate;
+                        // if (isDate(res.licenddate) && currenttime < res.licenddate) {
+                        //     isValid = true;
+                        // }
                         isPendingAmount = res.isamountpending && res.isamountpending == 'Y';
+                        console.log('isValid :' + isValid + ' ,check :' + (isDate(res.licenddate) && currenttime < res.licenddate));
+                        console.log('currenttime :' + currenttime + ' ,isPendingAmount :' + isPendingAmount + ' ,licenddate :' + res.licenddate);
                     }
                 }).catch(err => {
                     throw err;
@@ -41,11 +45,13 @@ class LicenseDBHandler {
                                     isValid = false;
                                 }
                             }
+                            console.log('isValid :' + isValid + ' ,totalPendingAmount :' + totalPendingAmount + ' ,paymentcleardate :' + res.paymentcleardate);
                         }
                     }).catch(err => {
                         throw err;
                     });
                 }
+                console.log('isValid :' + isValid);
             }
         } catch (e) {
             throw e;

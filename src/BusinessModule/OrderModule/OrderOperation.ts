@@ -10,11 +10,18 @@ class OrderOpHandler {
         let retVal: MethodResponse = new MethodResponse();
         let output: MethodResponse = null;
         try {
-            if (true) {
-                //TBD: Validate header
+            if (await OrderUtilHandle.ValidateOrderDetailsRequest(body)) {
+                //Validate header
                 output = await LoginHandle.ValidateHeader(header);
                 if (output && output.ErrorCode == 0 && output.Result) {
-                    //TBD: Get order list
+                    let userDBName: string = output.Result ? output.Result.userdbname : '';
+                    let userDBUrl: string = output.Result ? output.Result.userdburl : '';
+                    if (userDBName && userDBName.length > 0) {
+                        //TBD: Get order list
+                    } else {
+                        retVal.ErrorCode = 3;
+                        retVal.Message = 'There are some error on selecting user db name.';
+                    }
                     retVal = await Util.SetOutputResponse(output, retVal);
                 } else {
                     retVal.ErrorCode = 2;

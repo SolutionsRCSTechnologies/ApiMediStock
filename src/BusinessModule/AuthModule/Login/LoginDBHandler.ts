@@ -64,20 +64,24 @@ class LoginDBHandler {
                             if (res) {
                                 maxusercount = res.maxusercount;
                                 licid = res.licid;
-                                if (res.users && res.users.length > 0) {
-                                    for (let i = 0; i < res.users.length; i++) {
-                                        if (personid == res.users[i]) {
-                                            isExistingUser = true;
-                                        }
-                                    }
-                                    if (isExistingUser) {
-                                        result.UserDB = res.userdbname;
-                                        result.UserDBUrl = res.userdburl;
-                                    } else {
-                                        errorCode = 7;
-                                    }
+                                if (personid == ownerrefid) {
+                                    isExistingUser = true;
                                 } else {
-                                    errorCode = 6;
+                                    if (res.users && res.users.length > 0) {
+                                        for (let i = 0; i < res.users.length; i++) {
+                                            if (personid == res.users[i]) {
+                                                isExistingUser = true;
+                                            }
+                                        }
+                                    } else {
+                                        errorCode = 6;
+                                    }
+                                }
+                                if (isExistingUser) {
+                                    result.UserDB = res.userdbname;
+                                    result.UserDBUrl = res.userdburl;
+                                } else {
+                                    errorCode = 7;
                                 }
                             } else {
                                 errorCode = 5;
@@ -87,6 +91,7 @@ class LoginDBHandler {
                         });
                         //Check for active license
                         let isActiveLicense = await LicenseHandle.ValidateLicense(licid);
+                        console.log('Login isActiveLicense :' + isActiveLicense);
                         let isPlaceAvailable = false;
                         let currenttime = new Date();
                         currenttime.setHours(-4);
@@ -97,13 +102,12 @@ class LoginDBHandler {
                                     active: 'Y',
                                     endtime: { $gte: currenttime }
                                 }, { sort: { endtime: -1 } }).count().then(res => {
-                                    if (res && res > 0) {
-                                        isPlaceAvailable = res < maxusercount;
-                                    }
+                                    isPlaceAvailable = res <= maxusercount;
                                 }).catch(err => {
                                     throw err;
                                 });
                         }
+                        console.log('isPlaceAvailable :' + isPlaceAvailable + ' ,isActiveLicense :' + isActiveLicense + ' , isExistingUser :' + isExistingUser + ' ,result.UserId :' + result.UserId);
                         if (isPlaceAvailable && isActiveLicense && isExistingUser && result && result.UserId) {
                             result.StartTime = new Date();
                             result.EndTime = new Date();
@@ -250,7 +254,9 @@ class LoginDBHandler {
                         elapsedtime: result.endtime,
                         usertype: result.usertype,
                         userrole: result.role,
-                        username: result.username
+                        username: result.username,
+                        userdb: result.userdb,
+                        userdburl: result.userdburl
                     };
                     break;
             }

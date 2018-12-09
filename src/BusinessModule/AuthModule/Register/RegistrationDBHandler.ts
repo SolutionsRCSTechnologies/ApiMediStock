@@ -569,19 +569,31 @@ class RegistrationDBHandler {
                 if (isLicensed) {
                     status = 'Y';
                 }
+                let ownerRefID: string = '';
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
                 retVal.Result = false;
                 await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerid, licid: licid, active: 'Y' },
                     { $set: { licensed: status } }).then(res => {
-                        if (res && res.value) {
-                            console.log('Status updated');
+                        if (res.ok == 1) {
+                            ownerRefID = res.value ? res.value.ownerrefid : '';
+                            console.log(res.value);
                             retVal.Result = true;
                         }
                     }).catch(err => {
                         throw err;
                     });
+                if (ownerRefID && ownerRefID.length > 0) {
+                    await db.collection(MainDBCollection.Users).updateMany({ ownerrefid: ownerRefID, active: 'Y' }, { $set: { licensed: status } }, { upsert: true }).then(res => {
+                        if (res.modifiedCount > 0) {
+                            retVal.Result = true;
+                        }
+                    })
+                } else {
+                    retVal.ErrorCode = 2;
+                    retVal.Message = '';
+                }
             } else {
                 retVal.ErrorCode = 1;
                 retVal.Message = 'Information is not present.';
@@ -668,7 +680,7 @@ class RegistrationDBHandler {
         return retVal;
     }
 
-    async UpdateLicenseIdInRegistration(ownerId: string, licId: string) {
+    async UpdateLicenseIdInRegistration(ownerId: string, licId: string, maxusers?: number) {
         let retVal: MethodResponse = new MethodResponse();
         let errorCode: number = 0;
         let mClient: MongoClient = null;
@@ -678,9 +690,10 @@ class RegistrationDBHandler {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
+                maxusers = maxusers ? maxusers : 0;
                 console.log(ownerId + " " + licId);
                 await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerId, active: 'Y' },
-                    { $set: { licid: licId } }).then(res => {
+                    { $set: { licid: licId, maxusercount: maxusers } }, { upsert: true }).then(res => {
                         if (res.ok > 0) {
                             result = true;
                         } else {

@@ -7,6 +7,7 @@ class LicenseHandler {
         try {
             if (licid) {
                 isValid = await LicenseOpHandle.ValidateLicense(licid);
+                console.log('Handler isValid :' + isValid);
             }
         } catch (e) {
             throw e;
