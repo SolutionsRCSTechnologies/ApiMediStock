@@ -1,0 +1,24 @@
+:Request Structure:
+{
+"header": {
+			"userid": "",
+			"sessionid": "",
+			"password": ""
+		},
+"body": {
+			
+		}
+}
+
+:Response Structure:
+{
+"header": {
+			"sessionid": "",
+			"errorcode": 0,
+			"message": "",
+			"elapsedto": ""
+		},
+"body": {
+			
+		}
+}

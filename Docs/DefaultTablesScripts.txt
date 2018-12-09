@@ -1,0 +1,33 @@
+
+Licese Type DB Insert Doc:
+{
+"typeid": 1,
+"licensetype": "DEFAULT",
+"monthlyprice": 500.00,
+"dailyprice": 20.00,
+"yearlyprice": 5500.00,
+"currency":"INR",
+"isdaily":"Y",
+"ismonthly":"Y",
+"isyearly":"N",
+"duration": 10,
+"maxusers": 2,
+"paymentclearlengthindays": 10,
+"minduration": 20,
+"active": "Y"
+}
+
+User DB Collection DB Insert Doc:
+{
+"licid": "",
+"ownerid": "",
+"ownerrefid" : "",
+"dbname": "USERDB1",
+"dburl":"mongodb://localhost:27017",
+"assigned": "N",
+"active": "Y",
+"createdat": "03/12/2018",
+"createdby":"SYSTEM",
+"updatedat": "03/12/2018",
+"updatedby":"SYSTEM"
+}
