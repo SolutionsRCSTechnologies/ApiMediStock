@@ -14,7 +14,7 @@ class RoutingMethods {
     public async ActivateUser(reqData: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            if (await Util.ValidateRequsetStructure(reqData)) {
+            if (await Util.ValidateRequestStructure(reqData)) {
                 let header: any = reqData.header;
                 let body: any = reqData.body;
                 retVal = await RegistrationHandle.ActivateUser(header, body);
@@ -31,7 +31,7 @@ class RoutingMethods {
     public async Login(reqData: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            if (await Util.ValidateRequsetStructure(reqData)) {
+            if (await Util.ValidateRequestStructure(reqData)) {
                 let header: any = reqData.header;
                 let body: any = reqData.body;
                 retVal = await LoginHandle.Login(header, body);
@@ -48,7 +48,7 @@ class RoutingMethods {
     public async Logout(reqData: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            if (await Util.ValidateRequsetStructure(reqData)) {
+            if (await Util.ValidateRequestStructure(reqData)) {
                 let header: any = reqData.header;
                 let body: any = reqData.body;
                 retVal = await LoginHandle.Logout(header, body);
@@ -65,7 +65,7 @@ class RoutingMethods {
     public async Register(reqData: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            if (await Util.ValidateRequsetStructure(reqData)) {
+            if (reqData && reqData.header && reqData.body) {
                 let header: any = reqData.header;
                 let body: any = reqData.body;
                 retVal = await RegistrationHandle.Register(header, body);
@@ -82,7 +82,7 @@ class RoutingMethods {
     public async GetOrderList(reqData: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            if (await Util.ValidateRequsetStructure(reqData)) {
+            if (await Util.ValidateRequestStructure(reqData)) {
                 let header: any = reqData.header;
                 let body: any = reqData.body;
                 retVal = await OrderHandle.GetOrderList(header, body);
@@ -100,7 +100,7 @@ class RoutingMethods {
     public async RegisterLicense(reqData: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            if (await Util.ValidateRequsetStructure(reqData)) {
+            if (reqData && reqData.header && reqData.body) {
                 let header: any = reqData.header;
                 let body: any = reqData.body;
                 retVal = await LicenseHandle.RegisterLicense(header, body);

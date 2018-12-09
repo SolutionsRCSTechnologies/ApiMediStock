@@ -15,15 +15,15 @@ class LicenseUtilHandler {
                 if (req.lictype && req.lictype.length > 0) {
                     retVal.LicType = req.lictype.trim();
                 }
-                if (req.maxuser && req.maxuser > 0) {
-                    retVal.MaxUsers = req.maxuser;
+                if (req.maxusers && req.maxusers > 0) {
+                    retVal.MaxUsers = req.maxusers;
                 }
                 if (req.userdb && req.userdb.length > 0) {
                     retVal.UserDB = req.userdb.trim();
                 }
-                // if (req.userdburl && req.userdburl.length > 0) {
-                //     retVal. = req.userdburl.trim();
-                // }
+                if (req.userdburl && req.userdburl.length > 0) {
+                    retVal.UserDBUrl = req.userdburl.trim();
+                }
                 if (req.userdburl && req.userdburl.length > 0) {
                     retVal.UserDBUrl = req.userdburl.trim();
                 }
@@ -32,6 +32,9 @@ class LicenseUtilHandler {
                 }
                 if (req.licenddate && isDate(req.licenddate)) {
                     retVal.LicEndDate = req.licenddate;
+                }
+                if (req.isamountpending && req.isamountpending.length > 0) {
+                    retVal.IsAmountPending = req.isamountpending.trim().toUpperCase();
                 }
                 retVal.Active = 'Y';
             }
@@ -63,13 +66,13 @@ class LicenseUtilHandler {
                 // if (!(req.paidamount && req.paidamount > 0)) {
                 //     retVal = false;
                 // }
-                if (req.applydiscountamount && req.applydiscountamount.length > 0) {
-                    if (!(req.discountamount && req.discountamount > 0)) {
+                if (req.paymentdetail.applydiscountamount && req.paymentdetail.applydiscountamount.length > 0) {
+                    if (!(req.paymentdetail.discountamount && req.paymentdetail.discountamount > 0)) {
                         retVal = false;
                     }
                 }
-                if (req.applydiscountpercentage && req.applydiscountpercentage.length > 0) {
-                    if (!(req.discountpercentage && req.discountpercentage > 0)) {
+                if (req.paymentdetail.applydiscountpercentage && req.paymentdetail.applydiscountpercentage.length > 0) {
+                    if (!(req.paymentdetail.discountpercentage && req.paymentdetail.discountpercentage > 0)) {
                         retVal = false;
                     }
                 }
@@ -190,7 +193,7 @@ class LicenseUtilHandler {
                 } else {
                     retVal.TotalDiscountAmount = 0;
                 }
-                if (req.paymentcleardate) {
+                if (isDate(req.paymentcleardate)) {
                     retVal.PaymentClearDate = req.paymentcleardate;
                 }
                 // if (req.yearlyprice && req.yearlyprice > 0) {
@@ -241,15 +244,18 @@ class LicenseUtilHandler {
                 let lastPaidAmt: number = 0;
                 let totalPendingAmt: number = 0;
                 let dtOfPaymentClearance: Date = new Date();
+                let currDays: number = dtOfPaymentClearance.getDate();
                 let expireDate: Date = reqObj.expiredate && isDate(reqObj.expiredate) ? reqObj.expiredate : new Date();
                 let paymentClearLengthDays: number = reqObj.paymentclearlengthindays && reqObj.paymentclearlengthindays > 0 ? reqObj.paymentclearlengthindays : 10;
+                console.log('paymentClearLengthDays :' + paymentClearLengthDays);
+                dtOfPaymentClearance.setDate(currDays + paymentClearLengthDays);
                 if (reqObj.paymentoptions) {
                     let payment = reqObj.paymentoptions;
                     isDiscountAmtApp = payment.applydiscountamount && payment.applydiscountamount.trim().toUpperCase() == 'Y';
                     isDiscountPerApp = payment.applydiscountpercentage && payment.applydiscountpercentage.trim().toUpperCase() == 'Y';
                     discountAmt = payment.discountamount && payment.discountamount > 0 ? payment.discountamount : 0;
                     discountPer = payment.discountpercentage && payment.discountpercentage > 0 ? payment.discountpercentage : 0;
-                    lastPaidAmt = payment.paidamount && payment.paidamount > 0 ? payment.paidamount : 0;
+                    lastPaidAmt = (!isNaN(payment.paidamount)) && payment.paidamount > 0 ? payment.paidamount : 0;
 
                     if (isDiscountAmtApp) {
                         discountedTotal = discountAmt;
@@ -258,13 +264,12 @@ class LicenseUtilHandler {
                     }
                     payableAmount = discountedTotal > totalprice ? 0.0 : totalprice - discountedTotal;
                     totalPendingAmt = payableAmount - lastPaidAmt;
-                    if (totalPendingAmt > 0) {
-                        dtOfPaymentClearance.setDate(paymentClearLengthDays);
-                    } else {
-                        dtOfPaymentClearance = expireDate;
-                    }
                 }
-
+                // if (totalPendingAmt > 0) {
+                //     dtOfPaymentClearance.setDate(paymentClearLengthDays);
+                // } else {
+                //     dtOfPaymentClearance = expireDate;
+                // }
                 let req: any = {
                     lictype: reqObj.lictype,
                     ownerid: reqObj.ownerid,

@@ -19,7 +19,9 @@
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "guid-typescript": "^1.0.7",
+    "moment": "^2.22.2",
     "mongodb": "^3.1.6",
+    "node-datetime": "^2.1.2",
     "nodemon": "^1.18.6",
     "typescript": "^3.0.3"
   }

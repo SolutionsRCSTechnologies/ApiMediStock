@@ -1,0 +1,11 @@
+License Registration Request:
+{
+"header":{},
+"body":{
+		"lictype": "DEFAULT",
+		"subscriptiontype": "DAILY",
+		"subscriptionlength": 75,
+		"ownerid": "somnath_das",
+		"modifyifany": "Y"
+		}
+}

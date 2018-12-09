@@ -1,5 +1,6 @@
 import { Long, Double } from 'bson';
 import { Util } from './UtilHandler';
+import * as moment from 'moment';
 
 export class LicenseType {
     private typeid: string;
@@ -37,6 +38,7 @@ export class LicenseDetail {
     private dbcreated: string = 'N';
     private licstartdate: Date = new Date();
     private licenddate: Date = new Date();
+    private isamountpending: string = 'Y';
     //private licpurcrefid: string;
     private active: string;
     private createdat: Date = new Date();
@@ -55,6 +57,12 @@ export class LicenseDetail {
         });
     }
 
+    public get IsAmountPending(): string {
+        return this.isamountpending;
+    }
+    public set IsAmountPending(val) {
+        this.isamountpending = val;
+    }
     public get DBCreated(): string {
         return this.dbcreated;
     }
@@ -723,7 +731,7 @@ export class ActiveSession {
     private userrole: string;
 
     constructor() {
-        let timestr = new Date().toTimeString();
+        let timestr = new Date().getMilliseconds().toPrecision(5);
         Util.GetCustomGuidStr('SESSION', timestr).then(str => {
             this._id = str;
             this.sessionid = str;

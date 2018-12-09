@@ -1,0 +1,33 @@
+Owner Registration Request:
+{
+"header":{},
+"body": {
+			"registrationtype": "OWNER",
+			"ownerid": "somnath_das",
+			"password": "123456",
+			"emailid": "somnath.das@cdr.com",
+			"ownerfirstname":"Somnath",
+			"mobileno": 947****1,
+			"druglicense": "DRUG12880",
+			"shopname": "Das Medical Hall",
+			"address": "104/1 A.B.Garden",
+			"country": "India"
+			}
+}
+
+User Registration Request
+{
+"header":{},
+"body": {
+			"registrationtype": "USER",
+			"ownerid": "subhojit_roy"
+			"users":{
+						"userid":"sourav_chakraborty",
+						"password": "1234567",
+						"firstname":"Sourav",
+						"emailid":"sourav.chakraborty@cdr.com",
+						"mobileno": 9681445370,
+						"address": "Green Park, Sheoraphuli, Hooghly"
+					}
+			}
+}

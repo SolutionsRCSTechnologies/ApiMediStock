@@ -15,6 +15,7 @@ class LicenseOpHandler {
         try {
             if (licid) {
                 isValid = await LicenseDBHandle.ValidateLicense(licid);
+                console.log('Op isValid :' + isValid);
             }
         } catch (e) {
             throw e;
@@ -192,14 +193,17 @@ class LicenseOpHandler {
                             if (body.subscriptionlength && body.subscriptionlength > 0) {
                                 duration = body.subscriptionlength;
                             }
+                            console.log('duration :' + duration + ' ,minDuration :' + minDuration);
                             if (duration >= minDuration) {
-                                if (body.subscriptiontype && body.subscriptiontype > 0) {
+                                if (body.subscriptiontype && body.subscriptiontype.length > 0) {
                                     subsType = body.subscriptiontype.trim().toUpperCase();
                                     switch (subsType) {
                                         case 'DAILY':
                                             if (isDaily) {
                                                 let curDay: number = endDt.getDate();
                                                 endDt.setDate(curDay + duration);
+                                                console.log('End Date :' + endDt);
+                                                console.log('count :' + (curDay + duration));
                                             } else {
                                                 errorCode = 8;
                                             }
@@ -208,6 +212,8 @@ class LicenseOpHandler {
                                             if (isMonthly) {
                                                 let curMon: number = endDt.getMonth();
                                                 endDt.setMonth(curMon + duration);
+                                                console.log('End Date :' + endDt);
+                                                console.log('count :' + (curMon + duration));
                                             } else {
                                                 errorCode = 9;
                                             }
@@ -216,6 +222,8 @@ class LicenseOpHandler {
                                             if (isYearly) {
                                                 let curYear: number = endDt.getFullYear();
                                                 endDt.setFullYear(curYear + duration);
+                                                console.log('End Date :' + endDt);
+                                                console.log('count :' + (curYear + duration));
                                             } else {
                                                 errorCode = 10;
                                             }
@@ -260,7 +268,7 @@ class LicenseOpHandler {
                                     if (output && output.ErrorCode == 0 && output.Result) {
                                         //update license id in existing registration info
                                         output = null;
-                                        output = await RegistrationOpHandle.UpdateLicenseIdInRegistration(body.ownerid, licId);
+                                        output = await RegistrationOpHandle.UpdateLicenseIdInRegistration(body.ownerid, licId, reqObj.maxusers);
                                         if (output && output.ErrorCode == 0 && output.Result) {
                                             output = null;
                                             output = await RegistrationOpHandle.UpdateLicenseStatus(body.ownerid, licId, true);

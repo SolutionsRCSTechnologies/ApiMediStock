@@ -116,7 +116,6 @@ class RegistrationOperations {
         try {
             if (body) {
                 let content = body;
-                console.log(1);
                 //Validate request data
                 if (await RegisterUtilHandle.ValidateRequest(content)) {
                     let registrationType: string = content.registrationtype;
@@ -275,10 +274,10 @@ class RegistrationOperations {
         return retVal;
     }
 
-    async UpdateLicenseIdInRegistration(ownerId: string, licId: string) {
+    async UpdateLicenseIdInRegistration(ownerId: string, licId: string, maxusers?: number) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            retVal = await RegistrationDBHandle.UpdateLicenseIdInRegistration(ownerId, licId);
+            retVal = await RegistrationDBHandle.UpdateLicenseIdInRegistration(ownerId, licId, maxusers);
         } catch (e) {
             throw e;
         }
