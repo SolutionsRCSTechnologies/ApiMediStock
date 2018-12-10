@@ -518,9 +518,9 @@ export class RegistrationDetail {
     private regid: string;
     private licid: string;
     private ownerid: string;
-    private ownerfirstname: string;
-    private ownerlastname: string;
-    private ownermiddlename: string;
+    private firstname: string;
+    private lastname: string;
+    private middlename: string;
     private maxusercount: Long;
     private mobileno: Int16Array;
     private country: string;
@@ -662,17 +662,17 @@ export class RegistrationDetail {
     public set ShopName(val) {
         this.shopname = val;
     }
-    public get OwnerLastName(): string {
-        return this.ownerlastname;
+    public get LastName(): string {
+        return this.lastname;
     }
-    public set OwnerLastName(val) {
-        this.ownerlastname = val;
+    public set LastName(val) {
+        this.lastname = val;
     }
-    public get OwnerMiddleName(): string {
-        return this.ownermiddlename;
+    public get MiddleName(): string {
+        return this.middlename;
     }
-    public set OwnerMiddleName(val) {
-        this.ownermiddlename = val;
+    public set MiddleName(val) {
+        this.middlename = val;
     }
     public get MaxUserCount(): Long {
         return this.maxusercount;
@@ -692,11 +692,11 @@ export class RegistrationDetail {
     public set OwnerId(val) {
         this.ownerid = val;
     }
-    public get OwnerFirstName(): string {
-        return this.ownerfirstname;
+    public get FirstName(): string {
+        return this.firstname;
     }
-    public set OwnerFirstName(val) {
-        this.ownerfirstname = val;
+    public set FirstName(val) {
+        this.firstname = val;
     }
     public get LicId(): string {
         return this.licid;

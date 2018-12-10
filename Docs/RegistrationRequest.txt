@@ -6,7 +6,7 @@ Owner Registration Request:
 			"ownerid": "somnath_das",
 			"password": "123456",
 			"emailid": "somnath.das@cdr.com",
-			"ownerfirstname":"Somnath",
+			"firstname":"Somnath",
 			"mobileno": 947****1,
 			"druglicense": "DRUG12880",
 			"shopname": "Das Medical Hall",

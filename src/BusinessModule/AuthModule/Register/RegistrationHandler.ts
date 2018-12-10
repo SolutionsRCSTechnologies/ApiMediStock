@@ -7,6 +7,7 @@ class RegistrationHandler {
         try {
             if (header && body) {
                 retVal = await RegistrationOpHandle.RegistrationProcess(body, header);
+                console.log(retVal);
             } else {
                 retVal.ErrorCode = 1;
                 retVal.Message = 'Request body cannot be null or empty.';

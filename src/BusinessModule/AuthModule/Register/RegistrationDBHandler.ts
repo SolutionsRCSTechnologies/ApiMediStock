@@ -20,11 +20,14 @@ class RegistrationDBHandler {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.Users).findOne({ uesrid: userid, active: 'Y' }).then(res => {
-                    if (!res) {
+                console.log(userid);
+                await db.collection(MainDBCollection.Users).findOne({ userid: userid, active: 'Y' }).then(res => {
+                    if (res) {
+                        console.log(11);
                         result = true;
                     } else {
-                        errorCode = 2;
+                        //errorCode = 2;
+                        result = false;
                     }
                 }).catch(err => {
                     throw err;
@@ -32,6 +35,7 @@ class RegistrationDBHandler {
             } else {
                 errorCode = 1;
             }
+            console.log(errorCode);
             retVal.ErrorCode = errorCode;
             switch (errorCode) {
                 case 1:
@@ -44,6 +48,7 @@ class RegistrationDBHandler {
                     retVal.Result = result;
                     break;
             }
+            console.log(retVal.Result);
         } catch (e) {
             throw e;
         }
@@ -121,17 +126,18 @@ class RegistrationDBHandler {
 
     async InsertUserInfo(userInfo: User) {
         let retVal: MethodResponse = new MethodResponse();
-        let result: string;
+        let result: string = '';
         let mClient: MongoClient;
         let errorCode: number = 0;
+        retVal.Result = result;
         try {
             if (userInfo) {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
                 await db.collection(MainDBCollection.Users).insertOne(userInfo).then(val => {
-                    if (val && val.insertedId) {
-                        result = userInfo.PersonId;
+                    if (val && val.insertedCount > 0) {
+                        result = userInfo.UserId;
                     } else {
                         errorCode = 2;
                     }
@@ -230,20 +236,24 @@ class RegistrationDBHandler {
             if (ownerid && ownerid.length > 0) {
                 //
                 let licenseId: string = null;
+                let ownerRefId: string = null;
                 let licResult = null;
                 let config = DBConfig;
 
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
+                console.log('ownerid : ' + ownerid);
                 await db.collection(MainDBCollection.Registrations).findOne({ ownerid: ownerid, active: 'Y' }).then(res => {
                     if (res) {
                         result = res;
+                        //console.log('res : ' + res);
                     }
                 }).catch(err => {
                     throw err;
                 });
                 if (result) {
                     licenseId = result.licid;
+                    ownerRefId = result.ownerrefid;
                     if (licenseId) {
                         await db.collection(MainDBCollection.Licenses).findOne({ licid: licenseId, active: 'Y' }).then(res => {
                             if (res) {
@@ -253,17 +263,23 @@ class RegistrationDBHandler {
                             throw err;
                         });
                         if (licResult) {
-                            if (licResult && licResult.licid && licResult.active == 'Y' && licResult.ownerrefid == result.ownerrefid) {
+                            console.log(licResult);
+                            if (licResult && licResult.ownerid == ownerid) {
                                 if (!result.users) {
                                     result.users = [];
                                 }
                                 let activeUserCount = 0;
-                                result.users.forEach(ele => {
-                                    if (ele && ele.active == 'Y') {
-                                        activeUserCount++;
+                                // result.users.forEach(ele => {
+                                //     if (ele && ele.active == 'Y') {
+                                //         activeUserCount++;
+                                //     }
+                                // });
+                                await db.collection(MainDBCollection.Users).find({ ownerrefid: ownerRefId, active: 'Y' }).toArray().then(res => {
+                                    if (res && res.length > 0) {
+                                        activeUserCount = res.length;
                                     }
-                                });
-                                if (!(licResult.maxusercount > activeUserCount)) {
+                                })
+                                if (!(licResult.maxuser > activeUserCount)) {
                                     errorCode = 5;
                                 }
                             } else {
@@ -322,9 +338,9 @@ class RegistrationDBHandler {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerid, active: 'Y', licensed: 'Y' },
-                    { $set: { users: updatedusers } }).then(res => {
-                        if (!res.lastErrorObject) {
+                await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerid, active: 'Y' },
+                    { $push: { users: updatedusers } }).then(res => {
+                        if (res.ok != 1) {
                             errorCode = 1;
                         }
                     }).catch(err => {
@@ -335,6 +351,7 @@ class RegistrationDBHandler {
                 errorCode = 2;
             }
             retVal.ErrorCode = errorCode;
+            console.log('Error Code: ' + errorCode);
             switch (errorCode) {
                 case 1:
                     retVal.Message = 'User is not added successfully.';

@@ -60,7 +60,8 @@ class RegistrationOperations {
     }
 
     async UserRegistrationProcess(reqData) {
-        let retVal = new MethodResponse();
+        let retVal: MethodResponse = new MethodResponse();
+        let output: MethodResponse = new MethodResponse();
         try {
             //
             let ownerId = reqData.ownerid;
@@ -69,30 +70,48 @@ class RegistrationOperations {
                 //Current users list
                 let currentUsers: string[] = response.Result.users;
                 let ownerrefid: string = response.Result.ownerrefid;
-                if (!currentUsers) {
-                    currentUsers = [];
-                }
-                let salepersons: User[] = await RegisterUtilHandle.GetSalePersons(reqData.users);
+                let licensed: string = response.Result.licensed ? response.Result.licensed : 'N';
+                currentUsers = currentUsers && currentUsers.length > 0 ? currentUsers : [];
+                let salepersons: User[] = await RegisterUtilHandle.GetSalePersons(reqData.users, licensed);
                 //Insert salesman user info in USER table and get user ids
                 let unregistereduserids: string[] = [];
                 if (salepersons && salepersons.length > 0) {
+                    console.log('Loop Start');
                     for (let i = 0; i < salepersons.length; i++) {
                         let subResult = await RegistrationDBHandle.CheckExistingUserId(salepersons[i].UserId);
-                        if (subResult && subResult.ErrorCode == 0) {
+                        if (subResult && subResult.ErrorCode == 0 && !subResult.Result) {
                             //Set owner id
-                            salepersons[i].OwnerRefId = ownerId;
+                            console.log(1);
+                            salepersons[i].OwnerRefId = ownerrefid;
                             //salepersons[i].PersonId = await Util.GetCustomGuidStr('US');
                             let uId = await RegistrationDBHandle.InsertUserInfo(salepersons[i]);
-                            if (uId && uId.Result) {
-                                if (currentUsers.findIndex(uId.Result) < 0) {
+                            if (uId && uId.ErrorCode == 0 && uId.Result && uId.Result.length > 0) {
+                                console.log(2);
+                                if (!(currentUsers.length > 0 && currentUsers.indexOf(uId.Result) > 0)) {
                                     currentUsers.push(uId.Result);
                                 }
+                                // if (currentUsers.findIndex(uId.Result) < 0) {
+                                //     currentUsers.push(uId.Result);
+                                // }
+                            } else {
+                                console.log(3);
+                                unregistereduserids.push(salepersons[i].UserId);
                             }
                         } else {
+                            console.log(4);
                             unregistereduserids.push(salepersons[i].UserId);
                         }
                     }
-                    retVal = await RegistrationDBHandle.AddNewUserInRegistration(ownerrefid, currentUsers);
+                    console.log('Loop End');
+                    output = await RegistrationDBHandle.AddNewUserInRegistration(ownerrefid, currentUsers);
+                    console.log(output);
+                    // if (retVal && retVal.ErrorCode == 0) {
+
+                    // } else {
+                    //     retVal.ErrorCode = 8;
+                    //     retVal.Message = 'User registered successfully but some error occured during update of registration information.';
+                    // }
+                    retVal = new MethodResponse();
                     retVal.Result = {
                         registeredusers: currentUsers,
                         unregisteredusers: unregistereduserids
