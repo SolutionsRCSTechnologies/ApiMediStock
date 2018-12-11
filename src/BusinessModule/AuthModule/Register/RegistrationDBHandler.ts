@@ -21,21 +21,14 @@ class RegistrationDBHandler {
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
                 console.log(userid);
-                await db.collection(MainDBCollection.Users).findOne({ userid: userid, active: 'Y' }).then(res => {
-                    if (res) {
-                        console.log(11);
-                        result = true;
-                    } else {
-                        //errorCode = 2;
-                        result = false;
-                    }
+                await db.collection(MainDBCollection.Users).findOne({ userid: userid }).then(res => {
+                    result = res != null ? true : false;
                 }).catch(err => {
                     throw err;
                 });
             } else {
                 errorCode = 1;
             }
-            console.log(errorCode);
             retVal.ErrorCode = errorCode;
             switch (errorCode) {
                 case 1:
@@ -48,7 +41,6 @@ class RegistrationDBHandler {
                     retVal.Result = result;
                     break;
             }
-            console.log(retVal.Result);
         } catch (e) {
             throw e;
         }
@@ -126,10 +118,10 @@ class RegistrationDBHandler {
 
     async InsertUserInfo(userInfo: User) {
         let retVal: MethodResponse = new MethodResponse();
-        let result: string = '';
+        let result = null;
         let mClient: MongoClient;
         let errorCode: number = 0;
-        retVal.Result = result;
+        //retVal.Result = result;
         try {
             if (userInfo) {
                 let config = DBConfig;
@@ -137,7 +129,10 @@ class RegistrationDBHandler {
                 let db: Db = await mClient.db(config.MainDBName);
                 await db.collection(MainDBCollection.Users).insertOne(userInfo).then(val => {
                     if (val && val.insertedCount > 0) {
-                        result = userInfo.UserId;
+                        result = {
+                            userid: userInfo.UserId,
+                            personid: userInfo.PersonId
+                        };
                     } else {
                         errorCode = 2;
                     }
@@ -161,9 +156,9 @@ class RegistrationDBHandler {
                     break;
             }
         } catch (e) {
-            //throw e;
-            retVal.ErrorCode = 3;
-            retVal.Message = e.message;
+            throw e;
+            //retVal.ErrorCode = 3;
+            //retVal.Message = e.message;
         }
         finally {
             if (mClient) {
@@ -215,9 +210,9 @@ class RegistrationDBHandler {
                     break;
             }
         } catch (e) {
-            //throw e;
-            console.log(e);
-            retVal.Message = e.message;
+            throw e;
+            //console.log(e);
+            //retVal.Message = e.message;
         }
         finally {
             if (mClient) {
@@ -329,18 +324,19 @@ class RegistrationDBHandler {
         return retVal;
     }
 
-    async AddNewUserInRegistration(ownerid: string, updatedusers: string[]) {
+    async AddNewUserInRegistration(ownerrefid: string, updatedusers: string[]) {
         let retVal: MethodResponse = new MethodResponse();
         let mClient: MongoClient;
         let errorCode: number = 0;
         try {
-            if (ownerid && updatedusers) {
+            if (ownerrefid && updatedusers) {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerid, active: 'Y' },
-                    { $push: { users: updatedusers } }).then(res => {
-                        if (res.ok != 1) {
+                await db.collection(MainDBCollection.Registrations).updateOne({ ownerrefid: ownerrefid, active: 'Y' },
+                    { $set: { users: updatedusers } }, { upsert: true }).then(res => {
+                        console.log(res.result);
+                        if (!(res.modifiedCount > 0)) {
                             errorCode = 1;
                         }
                     }).catch(err => {

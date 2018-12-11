@@ -24,6 +24,8 @@ class LoginHandler {
             retVal = await LoginOpHandle.ValidateHeader(header);
         } catch (e) {
             throw e;
+            //retVal.ErrorCode = 99999;
+            //retVal.Message = e.message;
         }
         return retVal;
     }
