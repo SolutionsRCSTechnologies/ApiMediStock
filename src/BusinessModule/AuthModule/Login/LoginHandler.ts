@@ -33,7 +33,7 @@ class LoginHandler {
     async Logout(header: any, body?: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            retVal = await LoginHandle.Logout(header, body);
+            retVal = await LoginOpHandle.Logout(header, body);
         } catch (e) {
             throw e;
         }

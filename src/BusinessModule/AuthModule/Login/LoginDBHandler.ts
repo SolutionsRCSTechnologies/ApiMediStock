@@ -23,7 +23,7 @@ class LoginDBHandler {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.ActiveSession).findOne({ userid: userid }, { sort: { endtime: -1 } }).then(async res => {
+                await db.collection(MainDBCollection.ActiveSession).findOne({ userid: userid, active: 'Y' }, { sort: { endtime: -1 } }).then(async res => {
                     let response = await res;
                     if (response) {
                         let timestamp = new Date();
@@ -69,7 +69,7 @@ class LoginDBHandler {
                                 } else {
                                     if (res.users && res.users.length > 0) {
                                         for (let i = 0; i < res.users.length; i++) {
-                                            if (personid == res.users[i]) {
+                                            if (userid == res.users[i]) {
                                                 isExistingUser = true;
                                             }
                                         }
