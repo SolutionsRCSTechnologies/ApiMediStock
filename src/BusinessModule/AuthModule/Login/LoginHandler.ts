@@ -24,6 +24,8 @@ class LoginHandler {
             retVal = await LoginOpHandle.ValidateHeader(header);
         } catch (e) {
             throw e;
+            //retVal.ErrorCode = 99999;
+            //retVal.Message = e.message;
         }
         return retVal;
     }
@@ -31,7 +33,7 @@ class LoginHandler {
     async Logout(header: any, body?: any) {
         let retVal: MethodResponse = new MethodResponse();
         try {
-            retVal = await LoginHandle.Logout(header, body);
+            retVal = await LoginOpHandle.Logout(header, body);
         } catch (e) {
             throw e;
         }

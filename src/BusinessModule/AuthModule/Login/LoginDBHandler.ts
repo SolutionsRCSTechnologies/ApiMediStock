@@ -23,7 +23,7 @@ class LoginDBHandler {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.ActiveSession).findOne({ userid: userid }, { sort: { endtime: -1 } }).then(async res => {
+                await db.collection(MainDBCollection.ActiveSession).findOne({ userid: userid, active: 'Y' }, { sort: { endtime: -1 } }).then(async res => {
                     let response = await res;
                     if (response) {
                         let timestamp = new Date();
@@ -69,7 +69,7 @@ class LoginDBHandler {
                                 } else {
                                     if (res.users && res.users.length > 0) {
                                         for (let i = 0; i < res.users.length; i++) {
-                                            if (personid == res.users[i]) {
+                                            if (userid == res.users[i]) {
                                                 isExistingUser = true;
                                             }
                                         }
@@ -94,7 +94,8 @@ class LoginDBHandler {
                         console.log('Login isActiveLicense :' + isActiveLicense);
                         let isPlaceAvailable = false;
                         let currenttime = new Date();
-                        currenttime.setHours(-4);
+                        let currentHours: number = currenttime.getHours();
+                        currenttime.setHours(currentHours - 4);
                         if (maxusercount > 0) {
                             await db.collection(MainDBCollection.ActiveSession).find(
                                 {
@@ -111,7 +112,8 @@ class LoginDBHandler {
                         if (isPlaceAvailable && isActiveLicense && isExistingUser && result && result.UserId) {
                             result.StartTime = new Date();
                             result.EndTime = new Date();
-                            result.EndTime.setHours(4);
+                            let currentHours: number = result.EndTime.getHours();
+                            result.EndTime.setHours(currentHours + 4);
                             result.CreatedAt = new Date();
                             result.UpdatedAt = new Date();
                             await db.collection(MainDBCollection.ActiveSession).insertOne(result).then(res => {
@@ -130,12 +132,13 @@ class LoginDBHandler {
                     }
                 } else {
                     let elapsedTime = new Date();
+                    let currentHours: number = elapsedTime.getHours();
                     let sessionid = null;
                     let userid = null;
                     if (result && result.SessionId && result.UserId) {
                         sessionid = result.SessionId;
                         userid = result.UserId;
-                        elapsedTime.setHours(4);
+                        elapsedTime.setHours(currentHours + 4);
                         await db.collection(MainDBCollection.ActiveSession).findOneAndUpdate({ sessionid: sessionid, userid: userid }, { $set: { endtime: elapsedTime, updatedat: new Date(), updatedby: 'SYSTEM' } }, { upsert: true }).then(res => {
                             if (!(res.ok == 1)) {
                                 errorCode = 4;

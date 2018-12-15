@@ -10,20 +10,20 @@ class RegisterUtilHandler {
                 if (reqData.ownerid) {
                     retVal.OwnerId = reqData.ownerid;
                 }
-                if (reqData.ownerfirstname) {
-                    retVal.OwnerFirstName = reqData.ownerfirstname;
+                if (reqData.firstname) {
+                    retVal.FirstName = reqData.firstname;
                 } else {
-                    retVal.OwnerFirstName = "";
+                    retVal.FirstName = "";
                 }
-                if (reqData.ownermiddlename) {
-                    retVal.OwnerMiddleName = reqData.ownermiddlename;
+                if (reqData.middlename) {
+                    retVal.MiddleName = reqData.middlename;
                 } else {
-                    retVal.OwnerMiddleName = "";
+                    retVal.MiddleName = "";
                 }
-                if (reqData.ownerlastname) {
-                    retVal.OwnerLastName = reqData.ownerlastname;
+                if (reqData.lastname) {
+                    retVal.LastName = reqData.lastname;
                 } else {
-                    retVal.OwnerLastName = "";
+                    retVal.LastName = "";
                 }
                 if (reqData.mobileno) {
                     retVal.MobileNo = reqData.mobileno;
@@ -83,20 +83,20 @@ class RegisterUtilHandler {
                 if (reqData.ownerid) {
                     retVal.OwnerId = reqData.ownerid;
                 }
-                if (reqData.ownerfirstname) {
-                    retVal.OwnerFirstName = reqData.ownerfirstname;
+                if (reqData.firstname) {
+                    retVal.FirstName = reqData.firstname;
                 } else {
-                    retVal.OwnerFirstName = "";
+                    retVal.FirstName = "";
                 }
-                if (reqData.ownermiddlename) {
-                    retVal.OwnerMiddleName = reqData.ownermiddlename;
+                if (reqData.middlename) {
+                    retVal.MiddleName = reqData.middlename;
                 } else {
-                    retVal.OwnerMiddleName = "";
+                    retVal.MiddleName = "";
                 }
-                if (reqData.ownerlastname) {
-                    retVal.OwnerLastName = reqData.ownerlastname;
+                if (reqData.lastname) {
+                    retVal.LastName = reqData.lastname;
                 } else {
-                    retVal.OwnerLastName = "";
+                    retVal.LastName = "";
                 }
                 if (reqData.mobileno) {
                     retVal.MobileNo = reqData.mobileno;
@@ -212,14 +212,14 @@ class RegisterUtilHandler {
             if (reqData) {
                 retVal = new User(true);
                 retVal.UserType = "OWNER";
-                if (reqData.ownerfirstname) {
-                    retVal.FirstName = reqData.ownerfirstname;
+                if (reqData.firstname) {
+                    retVal.FirstName = reqData.firstname;
                 }
-                if (reqData.ownermiddlename) {
-                    retVal.MiddleName = reqData.ownermiddlename;
+                if (reqData.middlename) {
+                    retVal.MiddleName = reqData.middlename;
                 }
-                if (reqData.ownerlastname) {
-                    retVal.LastName = reqData.ownerlastname;
+                if (reqData.lastname) {
+                    retVal.LastName = reqData.lastname;
                 }
                 if (reqData.mobileno) {
                     retVal.MobileNo = reqData.mobileno;
@@ -257,15 +257,17 @@ class RegisterUtilHandler {
         return retVal;
     }
 
-    async GetSalePersons(users: any[]) {
+    async GetSalePersons(users: any[], licensed?: string) {
         let retVal: User[] = [];
         try {
             if (users && users.length > 0) {
                 let userInfo: User;
+                licensed = licensed && licensed.length > 0 ? licensed : 'N';
                 for (let index = 0; index < users.length; index++) {
                     if (users[index]) {
                         //Validate user data
                         userInfo = await this.GetUserDoc(users[index]);
+                        userInfo.Licensed = licensed;
                         retVal.push(userInfo);
                     }
                 }
@@ -286,7 +288,7 @@ class RegisterUtilHandler {
                 if (req.registrationtype && req.registrationtype.trim().length > 0) {
                     switch (req.registrationtype.trim().toUpperCase()) {
                         case 'OWNER':
-                            if (isValid && !(req.ownerid && req.password && req.emailid && req.ownerfirstname && req.mobileno && req.druglicense && req.shopname && req.address && req.country)) {
+                            if (isValid && !(req.ownerid && req.password && req.emailid && req.firstname && req.mobileno && req.druglicense && req.shopname && req.address && req.country)) {
                                 isValid = false;
                             }
                             break;

@@ -20,12 +20,9 @@ class RegistrationDBHandler {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.Users).findOne({ uesrid: userid, active: 'Y' }).then(res => {
-                    if (!res) {
-                        result = true;
-                    } else {
-                        errorCode = 2;
-                    }
+                console.log(userid);
+                await db.collection(MainDBCollection.Users).findOne({ userid: userid }).then(res => {
+                    result = res != null ? true : false;
                 }).catch(err => {
                     throw err;
                 });
@@ -121,17 +118,21 @@ class RegistrationDBHandler {
 
     async InsertUserInfo(userInfo: User) {
         let retVal: MethodResponse = new MethodResponse();
-        let result: string;
+        let result = null;
         let mClient: MongoClient;
         let errorCode: number = 0;
+        //retVal.Result = result;
         try {
             if (userInfo) {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
                 await db.collection(MainDBCollection.Users).insertOne(userInfo).then(val => {
-                    if (val && val.insertedId) {
-                        result = userInfo.PersonId;
+                    if (val && val.insertedCount > 0) {
+                        result = {
+                            userid: userInfo.UserId,
+                            personid: userInfo.PersonId
+                        };
                     } else {
                         errorCode = 2;
                     }
@@ -155,9 +156,9 @@ class RegistrationDBHandler {
                     break;
             }
         } catch (e) {
-            //throw e;
-            retVal.ErrorCode = 3;
-            retVal.Message = e.message;
+            throw e;
+            //retVal.ErrorCode = 3;
+            //retVal.Message = e.message;
         }
         finally {
             if (mClient) {
@@ -209,9 +210,9 @@ class RegistrationDBHandler {
                     break;
             }
         } catch (e) {
-            //throw e;
-            console.log(e);
-            retVal.Message = e.message;
+            throw e;
+            //console.log(e);
+            //retVal.Message = e.message;
         }
         finally {
             if (mClient) {
@@ -230,20 +231,24 @@ class RegistrationDBHandler {
             if (ownerid && ownerid.length > 0) {
                 //
                 let licenseId: string = null;
+                let ownerRefId: string = null;
                 let licResult = null;
                 let config = DBConfig;
 
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
+                console.log('ownerid : ' + ownerid);
                 await db.collection(MainDBCollection.Registrations).findOne({ ownerid: ownerid, active: 'Y' }).then(res => {
                     if (res) {
                         result = res;
+                        //console.log('res : ' + res);
                     }
                 }).catch(err => {
                     throw err;
                 });
                 if (result) {
                     licenseId = result.licid;
+                    ownerRefId = result.ownerrefid;
                     if (licenseId) {
                         await db.collection(MainDBCollection.Licenses).findOne({ licid: licenseId, active: 'Y' }).then(res => {
                             if (res) {
@@ -253,17 +258,23 @@ class RegistrationDBHandler {
                             throw err;
                         });
                         if (licResult) {
-                            if (licResult && licResult.licid && licResult.active == 'Y' && licResult.ownerrefid == result.ownerrefid) {
+                            console.log(licResult);
+                            if (licResult && licResult.ownerid == ownerid) {
                                 if (!result.users) {
                                     result.users = [];
                                 }
                                 let activeUserCount = 0;
-                                result.users.forEach(ele => {
-                                    if (ele && ele.active == 'Y') {
-                                        activeUserCount++;
+                                // result.users.forEach(ele => {
+                                //     if (ele && ele.active == 'Y') {
+                                //         activeUserCount++;
+                                //     }
+                                // });
+                                await db.collection(MainDBCollection.Users).find({ ownerrefid: ownerRefId, active: 'Y' }).toArray().then(res => {
+                                    if (res && res.length > 0) {
+                                        activeUserCount = res.length;
                                     }
-                                });
-                                if (!(licResult.maxusercount > activeUserCount)) {
+                                })
+                                if (!(licResult.maxuser > activeUserCount)) {
                                     errorCode = 5;
                                 }
                             } else {
@@ -313,18 +324,19 @@ class RegistrationDBHandler {
         return retVal;
     }
 
-    async AddNewUserInRegistration(ownerid: string, updatedusers: string[]) {
+    async AddNewUserInRegistration(ownerrefid: string, updatedusers: string[]) {
         let retVal: MethodResponse = new MethodResponse();
         let mClient: MongoClient;
         let errorCode: number = 0;
         try {
-            if (ownerid && updatedusers) {
+            if (ownerrefid && updatedusers) {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.Registrations).findOneAndUpdate({ ownerid: ownerid, active: 'Y', licensed: 'Y' },
-                    { $set: { users: updatedusers } }).then(res => {
-                        if (!res.lastErrorObject) {
+                await db.collection(MainDBCollection.Registrations).updateOne({ ownerrefid: ownerrefid, active: 'Y' },
+                    { $set: { users: updatedusers } }, { upsert: true }).then(res => {
+                        console.log(res.result);
+                        if (!(res.modifiedCount > 0)) {
                             errorCode = 1;
                         }
                     }).catch(err => {
@@ -335,6 +347,7 @@ class RegistrationDBHandler {
                 errorCode = 2;
             }
             retVal.ErrorCode = errorCode;
+            console.log('Error Code: ' + errorCode);
             switch (errorCode) {
                 case 1:
                     retVal.Message = 'User is not added successfully.';

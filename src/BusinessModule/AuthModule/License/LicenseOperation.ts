@@ -194,47 +194,57 @@ class LicenseOpHandler {
                                 duration = body.subscriptionlength;
                             }
                             console.log('duration :' + duration + ' ,minDuration :' + minDuration);
-                            if (duration >= minDuration) {
-                                if (body.subscriptiontype && body.subscriptiontype.length > 0) {
-                                    subsType = body.subscriptiontype.trim().toUpperCase();
-                                    switch (subsType) {
-                                        case 'DAILY':
-                                            if (isDaily) {
+                            if (body.subscriptiontype && body.subscriptiontype.length > 0) {
+                                subsType = body.subscriptiontype.trim().toUpperCase();
+                                switch (subsType) {
+                                    case 'DAILY':
+                                        if (isDaily) {
+                                            if (duration >= minDuration) {
                                                 let curDay: number = endDt.getDate();
                                                 endDt.setDate(curDay + duration);
                                                 console.log('End Date :' + endDt);
                                                 console.log('count :' + (curDay + duration));
                                             } else {
-                                                errorCode = 8;
+                                                errorCode = 14;
                                             }
-                                            break;
-                                        case 'MONTHLY':
-                                            if (isMonthly) {
+                                        } else {
+                                            errorCode = 8;
+                                        }
+                                        break;
+                                    case 'MONTHLY':
+                                        if (isMonthly) {
+                                            if (duration * 30 >= minDuration) {
                                                 let curMon: number = endDt.getMonth();
                                                 endDt.setMonth(curMon + duration);
                                                 console.log('End Date :' + endDt);
                                                 console.log('count :' + (curMon + duration));
                                             } else {
-                                                errorCode = 9;
+                                                errorCode = 14;
                                             }
-                                            break;
-                                        case 'YEARLY':
-                                            if (isYearly) {
+                                        } else {
+                                            errorCode = 9;
+                                        }
+                                        break;
+                                    case 'YEARLY':
+                                        if (isYearly) {
+                                            if (duration * 365 >= minDuration) {
                                                 let curYear: number = endDt.getFullYear();
                                                 endDt.setFullYear(curYear + duration);
                                                 console.log('End Date :' + endDt);
                                                 console.log('count :' + (curYear + duration));
                                             } else {
-                                                errorCode = 10;
+                                                errorCode = 14;
                                             }
-                                            break;
-                                        default:
-                                            errorCode = 11;
-                                            break;
-                                    }
+                                        } else {
+                                            errorCode = 10;
+                                        }
+                                        break;
+                                    default:
+                                        errorCode = 11;
+                                        break;
                                 }
                             } else {
-                                errorCode = 14;
+                                errorCode = 18;
                             }
                             if (errorCode == 0) {
                                 let paymentOption: any = body.paymentdetail ? body.paymentdetail : null;
@@ -360,6 +370,9 @@ class LicenseOpHandler {
                     break;
                 case 17:
                     retVal.Message = 'Error occurred during license status update.';
+                    break;
+                case 18:
+                    retVal.Message = 'Invalid subscription type.';
                     break;
                 default:
                     retVal.Result = result;

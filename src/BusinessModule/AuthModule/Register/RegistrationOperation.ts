@@ -21,8 +21,8 @@ class RegistrationOperations {
                 ownerInfo.OwnerRefId = ownerInfo.PersonId;
                 //Insert user details in User table as Owner
                 let owneridResponse = await RegistrationDBHandle.InsertUserInfo(ownerInfo);
-                if (owneridResponse) {
-                    let ownerid = owneridResponse.Result;
+                if (owneridResponse && owneridResponse.Result && owneridResponse.Result.personid) {
+                    let ownerid = owneridResponse.Result.personid;
                     //Get salesman user info if available
                     let salepersons: User[] = await RegisterUtilHandle.GetSalePersons(reqData.users);
                     //Insert salesman user info in USER table and get user ids
@@ -33,8 +33,8 @@ class RegistrationOperations {
                             salepersons[i].OwnerRefId = ownerid;
                             //salepersons[i].PersonId = await Util.GetCustomGuidStr('US');
                             let uId = await RegistrationDBHandle.InsertUserInfo(salepersons[i]);
-                            if (uId && uId.Result) {
-                                userIds.push(uId.Result);
+                            if (uId && uId.Result && uId.Result.userid) {
+                                userIds.push(uId.Result.userid);
                             }
                         }
                     }
@@ -60,7 +60,8 @@ class RegistrationOperations {
     }
 
     async UserRegistrationProcess(reqData) {
-        let retVal = new MethodResponse();
+        let retVal: MethodResponse = new MethodResponse();
+        let output: MethodResponse = new MethodResponse();
         try {
             //
             let ownerId = reqData.ownerid;
@@ -69,33 +70,55 @@ class RegistrationOperations {
                 //Current users list
                 let currentUsers: string[] = response.Result.users;
                 let ownerrefid: string = response.Result.ownerrefid;
-                if (!currentUsers) {
-                    currentUsers = [];
-                }
-                let salepersons: User[] = await RegisterUtilHandle.GetSalePersons(reqData.users);
+                let licensed: string = response.Result.licensed ? response.Result.licensed : 'N';
+                currentUsers = currentUsers && currentUsers.length > 0 ? currentUsers : [];
+                console.log(reqData.users);
+                let salepersons: User[] = await RegisterUtilHandle.GetSalePersons(reqData.users, licensed);
                 //Insert salesman user info in USER table and get user ids
                 let unregistereduserids: string[] = [];
                 if (salepersons && salepersons.length > 0) {
+                    console.log('Loop Start');
                     for (let i = 0; i < salepersons.length; i++) {
                         let subResult = await RegistrationDBHandle.CheckExistingUserId(salepersons[i].UserId);
+                        let isExistingUser: boolean = true;
                         if (subResult && subResult.ErrorCode == 0) {
-                            //Set owner id
-                            salepersons[i].OwnerRefId = ownerId;
-                            //salepersons[i].PersonId = await Util.GetCustomGuidStr('US');
-                            let uId = await RegistrationDBHandle.InsertUserInfo(salepersons[i]);
-                            if (uId && uId.Result) {
-                                if (currentUsers.findIndex(uId.Result) < 0) {
-                                    currentUsers.push(uId.Result);
-                                }
-                            }
+                            isExistingUser = subResult.Result;
                         } else {
+                            console.log(4);
                             unregistereduserids.push(salepersons[i].UserId);
                         }
+                        if (!isExistingUser) {
+                            //Set owner id
+                            console.log(1);
+                            salepersons[i].OwnerRefId = ownerrefid;
+                            //salepersons[i].PersonId = await Util.GetCustomGuidStr('US');
+                            let uId = await RegistrationDBHandle.InsertUserInfo(salepersons[i]);
+                            if (uId && uId.ErrorCode == 0 && uId.Result && uId.Result.userid && uId.Result.userid.length > 0) {
+                                console.log(2);
+                                if (!(currentUsers.length > 0 && currentUsers.indexOf(uId.Result.userid) > 0)) {
+                                    currentUsers.push(uId.Result.userid);
+                                }
+                                output = await RegistrationDBHandle.AddNewUserInRegistration(ownerrefid, currentUsers);
+                                console.log(output);
+                                if (output) {
+                                    retVal.ErrorCode = output.ErrorCode;
+                                    retVal.Message = output.Message;
+                                }
+                            } else {
+                                console.log(3);
+                                unregistereduserids.push(salepersons[i].UserId);
+                            }
+                        } else {
+                            retVal.ErrorCode = 8;
+                            retVal.Message = 'User id is not available.';
+                        }
                     }
-                    retVal = await RegistrationDBHandle.AddNewUserInRegistration(ownerrefid, currentUsers);
-                    retVal.Result = {
-                        registeredusers: currentUsers,
-                        unregisteredusers: unregistereduserids
+                    console.log('Loop End');
+                    if (retVal.ErrorCode == 0) {
+                        retVal.Result = {
+                            registeredusers: currentUsers,
+                            unregisteredusers: unregistereduserids
+                        }
                     }
                 } else {
                     retVal.Message = 'There are no user for registration.';
@@ -269,7 +292,7 @@ class RegistrationOperations {
                 retVal.Message = 'Empty owner id.';
             }
         } catch (e) {
-
+            throw e;
         }
         return retVal;
     }
