@@ -172,11 +172,11 @@ export class MethodResponse {
     private errorcode: number = 0;
     private message: string = '';
     private result: any = null;
-    private elapsedto: Date;
+    private elapsedto: Date = new Date();
     private sessionid: string = '';
     private username: string = '';
-    private usertype: string;
-    private userrole: string;
+    private usertype: string = '';
+    private userrole: string = '';
 
     public get UserRole(): string {
         return this.userrole;

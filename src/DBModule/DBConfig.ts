@@ -8,6 +8,7 @@ class DataBaseConfig {
 
     constructor() {
         this._mainDBUrl = "mongodb://localhost:27017";
+        //this._mainDBUrl = "mongodb://localhost:27015";
         this._mainDBName = "MediStockDB";
         this.DBConfig = new DBConfigEntity(this._mainDBName, this._mainDBUrl);
     }
