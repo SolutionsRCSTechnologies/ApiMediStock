@@ -23,7 +23,7 @@ class LoginDBHandler {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.ActiveSession).findOne({ userid: userid, active: 'Y' }, { sort: { endtime: -1 } }).then(async res => {
+                await db.collection(MainDBCollection.ActiveSession).findOne({ userid: userid, active: 'Y', endtime: { $gte: new Date() } }, { sort: { endtime: -1 } }).then(async res => {
                     let response = await res;
                     if (response) {
                         let timestamp = new Date();
@@ -139,7 +139,7 @@ class LoginDBHandler {
                         sessionid = result.SessionId;
                         userid = result.UserId;
                         elapsedTime.setHours(currentHours + 4);
-                        await db.collection(MainDBCollection.ActiveSession).findOneAndUpdate({ sessionid: sessionid, userid: userid }, { $set: { endtime: elapsedTime, updatedat: new Date(), updatedby: 'SYSTEM' } }, { upsert: true }).then(res => {
+                        await db.collection(MainDBCollection.ActiveSession).findOneAndUpdate({ sessionid: sessionid, userid: userid, active: 'Y', endtime: { $gte: new Date() } }, { $set: { endtime: elapsedTime, updatedat: new Date(), updatedby: 'SYSTEM' } }).then(res => {
                             if (!(res.ok == 1)) {
                                 errorCode = 4;
                             }
@@ -191,7 +191,8 @@ class LoginDBHandler {
                         userid: result.UserId,
                         username: result.UserName,
                         sessionid: result.SessionId,
-                        type: result.UserType
+                        type: result.UserType,
+                        elapsedtime: result.EndTime
                     };
                     break;
             }
