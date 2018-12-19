@@ -1,5 +1,6 @@
 import { RegistrationDetail, User } from '../../../CommonModule/DBEntities';
 import { strict } from 'assert';
+import { MethodResponse } from '../../../CommonModule/Entities';
 
 class RegisterUtilHandler {
     async GetRegistrationInfoDoc(reqData) {
@@ -360,6 +361,22 @@ class RegisterUtilHandler {
             }
         } catch (e) {
             throw e;
+        }
+        return isValid;
+    }
+
+    async ValidateGetUsersRequest(req) {
+        let isValid: boolean = true;
+        try {
+            if (req) {
+                if (!(req.userphrase && req.userphrase.length > 0)) {
+                    isValid = false;
+                }
+            } else {
+                isValid = false;
+            }
+        } catch (error) {
+            isValid = false;
         }
         return isValid;
     }

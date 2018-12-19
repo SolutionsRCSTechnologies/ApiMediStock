@@ -6,6 +6,7 @@ import { ObjectId, ObjectID } from 'bson';
 import { MethodResponse } from '../../../CommonModule/Entities';
 import { parse } from 'path';
 import { triggerAsyncId } from 'async_hooks';
+import { LoginHandle } from '../Login/LoginHandler';
 
 class RegistrationOperations {
 
@@ -303,6 +304,29 @@ class RegistrationOperations {
             retVal = await RegistrationDBHandle.UpdateLicenseIdInRegistration(ownerId, licId, maxusers);
         } catch (e) {
             throw e;
+        }
+        return retVal;
+    }
+
+    async GetAllUserIds(body: any) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (await RegisterUtilHandle.ValidateGetUsersRequest(body)) {
+                let userId: string = body && body.userphrase && body.userphrase.trim().length >= 3 ? body.userphrase.trim() : '';
+                if (userId && userId.length >= 3) {
+                    let userPharse: string = '^' + userId;
+                    retVal = await RegistrationDBHandle.GetAllUserIds(userPharse);
+                } else {
+                    retVal.ErrorCode = 3;
+                    retVal.Message = 'User id is empty or less than 3.';
+                }
+            } else {
+                retVal.ErrorCode = 2;
+                retVal.Message = 'Request is not valid.';
+            }
+        } catch (error) {
+            retVal.ErrorCode = 1;
+            retVal.Message = 'Some error occurred in operation.';
         }
         return retVal;
     }

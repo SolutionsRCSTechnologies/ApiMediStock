@@ -113,6 +113,22 @@ class RoutingMethods {
         }
         return retVal;
     }
+
+    public async GetAllUserIds(reqData: any) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (reqData) {
+                let body: any = reqData.body;
+                retVal = await RegistrationHandle.GetAllUserIds(body);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Invalid request.';
+            }
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
 }
 
 export const RoutingHandler = [
@@ -157,6 +173,12 @@ export const RoutingHandler = [
         handler: new RoutingMethods().RegisterLicense,
         method: APIMethodType.POST,
         name: 'License registration Api'
+    },
+    {
+        url: '/auth/register/ids',
+        handler: new RoutingMethods().GetAllUserIds,
+        method: APIMethodType.POST,
+        name: 'Get all user ids'
     }
 ];
 

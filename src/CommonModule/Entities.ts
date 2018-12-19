@@ -178,6 +178,7 @@ export class MethodResponse {
     private usertype: string = '';
     private userrole: string = '';
 
+
     public get UserRole(): string {
         return this.userrole;
     }

@@ -41,14 +41,14 @@ class AppRouter {
                             case "0":
                                 app.get(route.url, (req, res) => {
                                     let reqData = req.params;
+                                    console.log(reqData);
                                     route.handler(reqData).then((obj) => {
                                         Util.SendResponse(res, obj);
                                         res.end();
-                                    })
-                                        .catch(err => {
-                                            Util.SendErrorResponse(res, err);
-                                            res.end();
-                                        })
+                                    }).catch(err => {
+                                        Util.SendErrorResponse(res, err);
+                                        res.end();
+                                    });
                                 });
                                 break;
                             case "1":
@@ -58,11 +58,10 @@ class AppRouter {
                                     route.handler(reqData).then((obj) => {
                                         Util.SendResponse(res, obj);
                                         res.end();
-                                    })
-                                        .catch(err => {
-                                            Util.SendErrorResponse(res, err);
-                                            res.end();
-                                        })
+                                    }).catch(err => {
+                                        Util.SendErrorResponse(res, err);
+                                        res.end();
+                                    });
                                 });
                                 break;
                         }

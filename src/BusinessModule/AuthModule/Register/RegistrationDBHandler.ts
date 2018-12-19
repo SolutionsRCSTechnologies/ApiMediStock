@@ -740,6 +740,39 @@ class RegistrationDBHandler {
         }
         return retVal;
     }
+
+    async GetAllUserIds(userIdPhrase: string) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        let result: string[] = null;
+        try {
+            let config = DBConfig;
+            mClient = await DBClient.GetMongoClient(config);
+            let db: Db = await mClient.db(config.MainDBName);
+            await db.collection(MainDBCollection.Users).find({ userid: { $regex: userIdPhrase } }).toArray().then(res => {
+                result = [];
+                if (res && res.length > 0) {
+                    res.forEach(arr => {
+                        if (arr && arr.userid) {
+                            result.push(arr.userid);
+                        }
+                    });
+                }
+            }).catch(err => {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Some error occurred in DataBase.';
+            });
+            retVal.Result = result;
+        } catch (e) {
+            retVal.ErrorCode = 1;
+            retVal.Message = 'Some error occurred.';
+        } finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
 }
 
 export let RegistrationDBHandle = new RegistrationDBHandler();
