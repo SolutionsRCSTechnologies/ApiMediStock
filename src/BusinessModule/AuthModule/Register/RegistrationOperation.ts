@@ -316,6 +316,9 @@ class RegistrationOperations {
                 if (userId && userId.length >= 3) {
                     let userPharse: string = '^' + userId;
                     retVal = await RegistrationDBHandle.GetAllUserIds(userPharse);
+                    if (retVal && retVal.ErrorCode == 0) {
+                        retVal.Message = userId;
+                    }
                 } else {
                     retVal.ErrorCode = 3;
                     retVal.Message = 'User id is empty or less than 3.';

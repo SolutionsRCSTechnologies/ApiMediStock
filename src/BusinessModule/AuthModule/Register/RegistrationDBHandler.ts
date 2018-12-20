@@ -58,8 +58,8 @@ class RegistrationDBHandler {
         let mClient: MongoClient;
         let errorCode: number = 0;
         try {
-            if (reqData && reqData.ownerid) {
-                let ownerid = reqData.ownerid;
+            if (reqData && reqData.userid) {
+                let ownerid = reqData.userid;
                 if (ownerid) {
                     let config = DBConfig;
                     mClient = await DBClient.GetMongoClient(config);
