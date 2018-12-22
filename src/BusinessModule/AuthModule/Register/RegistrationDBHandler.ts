@@ -298,7 +298,7 @@ class RegistrationDBHandler {
                     retVal.Message = 'Owner id is not valid.';
                     break;
                 case 2:
-                    retVal.Message = 'No registration information found.';
+                    retVal.Message = 'Ower id information is not valid.';
                     break;
                 case 3:
                     retVal.Message = 'License is not assigned to the registered owner.';

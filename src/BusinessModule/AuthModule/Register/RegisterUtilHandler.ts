@@ -289,7 +289,7 @@ class RegisterUtilHandler {
                 if (req.registrationtype && req.registrationtype.trim().length > 0) {
                     switch (req.registrationtype.trim().toUpperCase()) {
                         case 'OWNER':
-                            if (isValid && !(req.ownerid && req.password && req.emailid && req.firstname && req.mobileno && req.druglicense && req.shopname && req.address)) {
+                            if (isValid && !(req.userid && req.password && req.emailid && req.firstname && req.mobileno && req.druglicense && req.shopname && req.address)) {
                                 isValid = false;
                             }
                             break;
