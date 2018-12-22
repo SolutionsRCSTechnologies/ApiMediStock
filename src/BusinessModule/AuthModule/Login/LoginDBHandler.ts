@@ -237,6 +237,7 @@ class LoginDBHandler {
                     };
                     break;
             }
+            console.log(retVal.Result);
         } catch (e) {
             throw e;
         }
