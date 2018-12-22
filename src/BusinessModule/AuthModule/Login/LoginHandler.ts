@@ -8,6 +8,8 @@ class LoginHandler {
         try {
             if (header) {
                 retVal = await LoginOpHandle.LoginProcess(header);
+                console.log('Handler');
+                console.log(retVal);
             } else {
                 retVal.ErrorCode = 1;
                 retVal.Message = "Empty login request.";

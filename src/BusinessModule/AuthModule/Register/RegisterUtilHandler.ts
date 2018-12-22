@@ -1,5 +1,6 @@
 import { RegistrationDetail, User } from '../../../CommonModule/DBEntities';
 import { strict } from 'assert';
+import { MethodResponse } from '../../../CommonModule/Entities';
 
 class RegisterUtilHandler {
     async GetRegistrationInfoDoc(reqData) {
@@ -7,8 +8,8 @@ class RegisterUtilHandler {
         try {
             if (reqData) {
                 retVal = new RegistrationDetail();
-                if (reqData.ownerid) {
-                    retVal.OwnerId = reqData.ownerid;
+                if (reqData.userid) {
+                    retVal.OwnerId = reqData.userid;
                 }
                 if (reqData.firstname) {
                     retVal.FirstName = reqData.firstname;
@@ -224,8 +225,8 @@ class RegisterUtilHandler {
                 if (reqData.mobileno) {
                     retVal.MobileNo = reqData.mobileno;
                 }
-                if (reqData.ownerid) {
-                    retVal.UserId = reqData.ownerid;
+                if (reqData.userid) {
+                    retVal.UserId = reqData.userid;
                 }
                 if (reqData.address) {
                     retVal.Address = reqData.address;
@@ -288,7 +289,7 @@ class RegisterUtilHandler {
                 if (req.registrationtype && req.registrationtype.trim().length > 0) {
                     switch (req.registrationtype.trim().toUpperCase()) {
                         case 'OWNER':
-                            if (isValid && !(req.ownerid && req.password && req.emailid && req.firstname && req.mobileno && req.druglicense && req.shopname && req.address && req.country)) {
+                            if (isValid && !(req.ownerid && req.password && req.emailid && req.firstname && req.mobileno && req.druglicense && req.shopname && req.address)) {
                                 isValid = false;
                             }
                             break;
@@ -300,7 +301,6 @@ class RegisterUtilHandler {
                     }
                 }
                 if (isValid && req.users && req.users.length > 0) {
-
                     for (let i = 0; i < req.users.length; i++) {
                         let ele = req.users[i];
                         if (ele) {
@@ -360,6 +360,22 @@ class RegisterUtilHandler {
             }
         } catch (e) {
             throw e;
+        }
+        return isValid;
+    }
+
+    async ValidateGetUsersRequest(req) {
+        let isValid: boolean = true;
+        try {
+            if (req) {
+                if (!(req.userphrase && req.userphrase.length > 0)) {
+                    isValid = false;
+                }
+            } else {
+                isValid = false;
+            }
+        } catch (error) {
+            isValid = false;
         }
         return isValid;
     }

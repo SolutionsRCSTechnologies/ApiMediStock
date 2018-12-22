@@ -8,7 +8,29 @@ class LoginOperations {
         try {
             if (header) {
                 if (await LoginUtilHandle.ValidateLoginRequest(header)) {
-                    retVal = await LoginDBHandle.Login(header);
+                    if (header.password && header.password.length > 0) {
+                        retVal = await LoginDBHandle.Login(header);
+                    } else if (header.sessionid && header.sessionid.length > 0) {
+                        retVal = await LoginDBHandle.ValidateHeader(header);
+                    } else {
+                        retVal.ErrorCode = 3;
+                        retVal.Message = 'Login request must have an user id and a password or active sessionid';
+                    }
+                    if (retVal && retVal.ErrorCode == 0 && retVal.Result) {
+                        let res = retVal.Result;
+                        retVal.Result = {
+                            userid: res.userid,
+                            sessionid: res.sessionid,
+                            userrole: res.userrole,
+                            username: res.username,
+                            usertype: res.usertype
+                        };
+                        retVal.SessionId = res.sessionid;
+                        retVal.ElapsedTo = res.elapsedtime;
+                        retVal.UserName = res.username;
+                        retVal.UserRole = res.userrole;
+                        retVal.UserType = res.usertype;
+                    }
                 } else {
                     retVal.ErrorCode = 2;
                     retVal.Message = "Login request is not valid.";

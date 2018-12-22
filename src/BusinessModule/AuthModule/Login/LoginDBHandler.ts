@@ -20,136 +20,167 @@ class LoginDBHandler {
                 let userid = req.userid;
                 let password = req.password;
                 let isActiveSession = false;
+                let isValidUser: boolean = false;
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.ActiveSession).findOne({ userid: userid, active: 'Y', endtime: { $gte: new Date() } }, { sort: { endtime: -1 } }).then(async res => {
-                    let response = await res;
-                    if (response) {
-                        let timestamp = new Date();
-                        let elapsedtime = isDate(response.endtime) ? response.endtime : new Date().setFullYear(2000, 1, 1);
-                        if (timestamp < elapsedtime) {
-                            result = await LoginUtilHandle.GetActiveSession(response);
-                            isActiveSession = true;
+
+                await db.collection(MainDBCollection.Users).findOne({ userid: userid, active: 'Y' }).then(res => {
+                    if (res) {
+                        console.log('In Password: ' + password + ', DB Password: ' + res.password);
+                        if (res.password && res.password == password) {
+                            if (res.licensed && res.licensed == 'Y') {
+                                isValidUser = true;
+                            } else {
+                                errorCode = 13;
+                            }
                         } else {
-                            isActiveSession = false;
+                            errorCode = 12;
                         }
+                    } else {
+                        errorCode = 11;
                     }
                 }).catch(err => {
                     throw err;
                 });
-                if (!isActiveSession) {
-                    let ownerrefid = null;
-                    let personid = null;
-                    result = new ActiveSession();
-                    await db.collection(MainDBCollection.Users).findOne({ userid: userid, password: password, active: 'Y' }).then(res => {
-                        if (res) {
-                            personid = res.personid;
-                            ownerrefid = res.ownerrefid;
-                            result.OwnerRefId = res.ownerrefid;
-                            result.UserId = res.userid;
-                            result.UserType = res.usertype;
-                            result.UserName = res.firstname + " " + res.lastname;
-                        } else {
-                            errorCode = 2;
+                if (isValidUser) {
+                    await db.collection(MainDBCollection.ActiveSession).findOne({ userid: userid, active: 'Y', endtime: { $gte: new Date() } }, { sort: { endtime: -1 } }).then(async res => {
+                        let response = await res;
+                        if (response) {
+                            let timestamp = new Date();
+                            let elapsedtime = isDate(response.endtime) ? response.endtime : new Date().setFullYear(2000, 1, 1);
+                            if (timestamp < elapsedtime) {
+                                console.log('response session: ' + response.sessionid);
+                                result = await LoginUtilHandle.GetActiveSession(response);
+                                result.SessionId = response.sessionid;
+                                console.log('result session: ' + result.SessionId);
+                                isActiveSession = true;
+                            } else {
+                                isActiveSession = false;
+                            }
                         }
                     }).catch(err => {
                         throw err;
                     });
-                    if (ownerrefid) {
-                        let isExistingUser = false;
-                        let maxusercount = 0;
-                        let licid: string;
-                        await db.collection(MainDBCollection.Registrations).findOne({ ownerrefid: ownerrefid, active: 'Y', licensed: 'Y' }).then(res => {
+                    if (!isActiveSession) {
+                        let ownerrefid = null;
+                        let personid = null;
+                        result = new ActiveSession();
+                        await db.collection(MainDBCollection.Users).findOne({ userid: userid, password: password, active: 'Y' }).then(res => {
                             if (res) {
-                                maxusercount = res.maxusercount;
-                                licid = res.licid;
-                                if (personid == ownerrefid) {
-                                    isExistingUser = true;
-                                } else {
-                                    if (res.users && res.users.length > 0) {
-                                        for (let i = 0; i < res.users.length; i++) {
-                                            if (userid == res.users[i]) {
-                                                isExistingUser = true;
-                                            }
-                                        }
-                                    } else {
-                                        errorCode = 6;
-                                    }
-                                }
-                                if (isExistingUser) {
-                                    result.UserDB = res.userdbname;
-                                    result.UserDBUrl = res.userdburl;
-                                } else {
-                                    errorCode = 7;
-                                }
+                                personid = res.personid;
+                                ownerrefid = res.ownerrefid;
+                                result.OwnerRefId = res.ownerrefid;
+                                result.UserId = res.userid;
+                                result.UserType = res.usertype;
+                                result.UserName = res.firstname + " " + res.lastname;
                             } else {
-                                errorCode = 5;
+                                errorCode = 2;
                             }
                         }).catch(err => {
                             throw err;
                         });
-                        //Check for active license
-                        let isActiveLicense = await LicenseHandle.ValidateLicense(licid);
-                        console.log('Login isActiveLicense :' + isActiveLicense);
-                        let isPlaceAvailable = false;
-                        let currenttime = new Date();
-                        let currentHours: number = currenttime.getHours();
-                        currenttime.setHours(currentHours - 4);
-                        if (maxusercount > 0) {
-                            await db.collection(MainDBCollection.ActiveSession).find(
-                                {
-                                    ownerrefid: ownerrefid,
-                                    active: 'Y',
-                                    endtime: { $gte: currenttime }
-                                }, { sort: { endtime: -1 } }).count().then(res => {
-                                    isPlaceAvailable = res <= maxusercount;
-                                }).catch(err => {
-                                    throw err;
-                                });
-                        }
-                        console.log('isPlaceAvailable :' + isPlaceAvailable + ' ,isActiveLicense :' + isActiveLicense + ' , isExistingUser :' + isExistingUser + ' ,result.UserId :' + result.UserId);
-                        if (isPlaceAvailable && isActiveLicense && isExistingUser && result && result.UserId) {
-                            result.StartTime = new Date();
-                            result.EndTime = new Date();
-                            let currentHours: number = result.EndTime.getHours();
-                            result.EndTime.setHours(currentHours + 4);
-                            result.CreatedAt = new Date();
-                            result.UpdatedAt = new Date();
-                            await db.collection(MainDBCollection.ActiveSession).insertOne(result).then(res => {
-                                if (!(res && res.insertedCount > 0)) {
-                                    errorCode = 8;
+                        if (ownerrefid) {
+                            let isExistingUser = false;
+                            let maxusercount = 0;
+                            let licid: string;
+                            await db.collection(MainDBCollection.Registrations).findOne({ ownerrefid: ownerrefid, active: 'Y', licensed: 'Y' }).then(res => {
+                                if (res) {
+                                    maxusercount = res.maxusercount;
+                                    licid = res.licid;
+                                    if (personid == ownerrefid) {
+                                        isExistingUser = true;
+                                    } else {
+                                        if (res.users && res.users.length > 0) {
+                                            for (let i = 0; i < res.users.length; i++) {
+                                                if (userid == res.users[i]) {
+                                                    isExistingUser = true;
+                                                }
+                                            }
+                                        } else {
+                                            errorCode = 6;
+                                        }
+                                    }
+                                    if (isExistingUser) {
+                                        result.UserDB = res.userdbname;
+                                        result.UserDBUrl = res.userdburl;
+                                    } else {
+                                        errorCode = 7;
+                                    }
+                                } else {
+                                    errorCode = 5;
                                 }
                             }).catch(err => {
                                 throw err;
                             });
+                            //Check for active license
+                            let isActiveLicense = await LicenseHandle.ValidateLicense(licid);
+                            console.log('Login isActiveLicense :' + isActiveLicense);
+                            let isPlaceAvailable = false;
+                            let currenttime = new Date();
+                            let currentHours: number = currenttime.getHours();
+                            currenttime.setHours(currentHours - 4);
+                            if (maxusercount > 0) {
+                                await db.collection(MainDBCollection.ActiveSession).find(
+                                    {
+                                        ownerrefid: ownerrefid,
+                                        active: 'Y',
+                                        endtime: { $gte: currenttime }
+                                    }, { sort: { endtime: -1 } }).count().then(res => {
+                                        isPlaceAvailable = res <= maxusercount;
+                                    }).catch(err => {
+                                        throw err;
+                                    });
+                            }
+                            console.log('isPlaceAvailable :' + isPlaceAvailable + ' ,isActiveLicense :' + isActiveLicense + ' , isExistingUser :' + isExistingUser + ' ,result.UserId :' + result.UserId);
+                            if (isPlaceAvailable && isActiveLicense && isExistingUser && result && result.UserId) {
+                                result.StartTime = new Date();
+                                result.EndTime = new Date();
+                                let currentHours: number = result.EndTime.getHours();
+                                result.EndTime.setHours(currentHours + 4);
+                                result.CreatedAt = new Date();
+                                result.UpdatedAt = new Date();
+
+                                await db.collection(MainDBCollection.ActiveSession).insertOne(result).then(res => {
+                                    if (!(res && res.insertedCount > 0)) {
+                                        errorCode = 8;
+                                    }
+                                }).catch(err => {
+                                    throw err;
+                                });
+                            } else {
+                                errorCode = 10;
+                            }
                         } else {
-                            errorCode = 10;
+                            //Owner not found
+                            errorCode = 9;
                         }
                     } else {
-                        //Owner not found
-                        errorCode = 9;
+                        let elapsedTime = new Date();
+                        let currentHours: number = elapsedTime.getHours();
+                        let sessionid = null;
+                        let userid = null;
+                        if (result && result.SessionId && result.UserId) {
+                            sessionid = result.SessionId;
+                            userid = result.UserId;
+                            elapsedTime.setHours(currentHours + 4);
+                            //let dateStr: string = elapsedTime.toLocaleString();  new Date(new Date().setHours(new Date().getHours() + 4))
+                            console.log('Session Id: ' + sessionid + ', user Id: ' + userid);
+                            await db.collection(MainDBCollection.ActiveSession).updateOne({ sessionid: sessionid, userid: userid, active: 'Y' }, { $set: { endtime: elapsedTime, updatedat: new Date(), updatedby: 'SYSTEM' } }).then(res => {
+                                if (!(res.modifiedCount > 0)) {
+                                    errorCode = 4;
+                                }
+                            }).catch(err => {
+                                console.log(err);
+                                throw err;
+                            });
+                        } else {
+                            result = null;
+                            errorCode = 3;
+                        }
                     }
                 } else {
-                    let elapsedTime = new Date();
-                    let currentHours: number = elapsedTime.getHours();
-                    let sessionid = null;
-                    let userid = null;
-                    if (result && result.SessionId && result.UserId) {
-                        sessionid = result.SessionId;
-                        userid = result.UserId;
-                        elapsedTime.setHours(currentHours + 4);
-                        await db.collection(MainDBCollection.ActiveSession).findOneAndUpdate({ sessionid: sessionid, userid: userid, active: 'Y', endtime: { $gte: new Date() } }, { $set: { endtime: elapsedTime, updatedat: new Date(), updatedby: 'SYSTEM' } }).then(res => {
-                            if (!(res.ok == 1)) {
-                                errorCode = 4;
-                            }
-                        }).catch(err => {
-                            throw err;
-                        });
-                    } else {
-                        result = null;
-                        errorCode = 3;
-                    }
+                    errorCode = errorCode > 0 ? errorCode : 13;
                 }
             } else {
                 errorCode = 1;
@@ -186,16 +217,27 @@ class LoginDBHandler {
                 case 10:
                     retVal.Message = 'User not found with valid registration.';
                     break;
+                case 11:
+                    retVal.Message = 'Id is invalid or user is inactive.';
+                    break;
+                case 12:
+                    retVal.Message = 'Password is invalid.';
+                    break;
+                case 13:
+                    retVal.Message = 'User is not licensed, Please request owner to allow.';
+                    break;
                 default:
                     retVal.Result = {
                         userid: result.UserId,
                         username: result.UserName,
                         sessionid: result.SessionId,
-                        type: result.UserType,
-                        elapsedtime: result.EndTime
+                        usertype: result.UserType,
+                        elapsedtime: result.EndTime,
+                        userrole: result.UserRole
                     };
                     break;
             }
+            console.log(retVal.Result);
         } catch (e) {
             throw e;
         }
@@ -285,12 +327,13 @@ class LoginDBHandler {
                 let config = DBConfig;
                 mClient = await DBClient.GetMongoClient(config);
                 let db: Db = await mClient.db(config.MainDBName);
-                await db.collection(MainDBCollection.ActiveSession).findOneAndUpdate({ userid: userId, sessionid: sessionId, active: 'Y' },
+                await db.collection(MainDBCollection.ActiveSession).updateOne({ userid: userId, sessionid: sessionId, active: 'Y' },
                     { $set: { active: 'N' } }).then(res => {
-                        if (res.ok > 0) {
+                        if (res.modifiedCount > 0) {
                             result = 'User is successfully logged out.'
                         } else {
                             errorCode = 2;
+                            console.log('Matched Count: ' + res.matchedCount);
                         }
                     }).catch(err => {
                         throw err;

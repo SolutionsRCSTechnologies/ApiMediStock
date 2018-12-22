@@ -86,7 +86,7 @@ class LoginUtilHandler {
             if (!(reqData.userid && reqData.userid.length > 0)) {
                 isValid = false;
             }
-            if (!(reqData.password && reqData.password.length > 0)) {
+            if (!(reqData.sessionid && reqData.sessionid.length > 0) && !(reqData.password && reqData.password.length > 0)) {
                 isValid = false;
             }
         } else {
