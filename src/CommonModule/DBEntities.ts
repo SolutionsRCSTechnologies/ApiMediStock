@@ -523,7 +523,7 @@ export class RegistrationDetail {
     private middlename: string;
     private maxusercount: Long;
     private mobileno: Int16Array;
-    private country: string;
+    //private country: string;
     private address: string;
     private druglicense: string;
     private shopname: string;
@@ -638,12 +638,12 @@ export class RegistrationDetail {
     public set Users(val) {
         this.users = val;
     }
-    public get Country(): string {
-        return this.country;
-    }
-    public set Country(val) {
-        this.country = val;
-    }
+    // public get Country(): string {
+    //     return this.country;
+    // }
+    // public set Country(val) {
+    //     this.country = val;
+    // }
     public get Address(): string {
         return this.address;
     }
