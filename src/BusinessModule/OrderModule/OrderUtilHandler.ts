@@ -1,4 +1,4 @@
-import { LicenseDetail, LicensePurchase } from '../../CommonModule/DBEntities';
+import { LicenseDetail, LicensePurchase, OrderDetail } from '../../CommonModule/DBEntities';
 import { MethodResponse } from '../../CommonModule/Entities';
 import { isDate } from 'util';
 import { Double } from 'bson';
@@ -57,6 +57,24 @@ class OrderUtilHandler {
             throw e;
         }
         return isValid;
+    }
+
+    async CreateOrderDetail(ordObj: any, retailObj: any) {
+        let retVal: OrderDetail = new OrderDetail();
+        try {
+            if (ordObj) {
+                if (ordObj.userid && ordObj.userid.length > 0) {
+                    retVal.OrderCreatedById = ordObj.userid;
+                }
+                if (ordObj.userid && ordObj.userid.length > 0) {
+                    retVal.OrderCreatedById = ordObj.userid;
+                }
+                //TBD:
+            }
+        } catch (error) {
+            throw error;
+        }
+        return retVal;
     }
 }
 

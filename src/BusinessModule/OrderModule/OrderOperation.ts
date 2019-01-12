@@ -36,6 +36,30 @@ class OrderOpHandler {
         }
         return retVal;
     }
+
+    async CreateOrderSearchCriteria(reqSearch: any) {
+        let searchCrit: any = null;
+        try {
+            if (reqSearch) {
+
+            }
+        } catch (e) {
+            throw e;
+        }
+        return searchCrit;
+    }
+
+    async CreateOrderSearchFilter(reqSearch: any) {
+        let searchFilter: any = null;
+        try {
+            if (reqSearch) {
+
+            }
+        } catch (e) {
+            throw e;
+        }
+        return searchFilter;
+    }
 }
 
 export let OrderOpHandle = new OrderOpHandler();
