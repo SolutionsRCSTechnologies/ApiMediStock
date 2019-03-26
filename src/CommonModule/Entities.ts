@@ -88,7 +88,6 @@ export class RequestEntity {
     }
 }
 
-
 export class ResponseHeader {
     private message: string;
     private errorcode: number;
@@ -228,3 +227,162 @@ export class MethodResponse {
         this.result = val;
     }
 }
+
+export class DBConfiguaration {
+    private userDBName: string = '';
+    private userDBUrl: string = '';
+    private mainDBName: string = '';
+    private mainDBUrl: string = '';
+
+    public get UserDBName(): string {
+        return this.userDBName;
+    }
+    public set UserDBName(val: string) {
+        this.userDBName = val;
+    }
+    public get UserDBUrl(): string {
+        return this.userDBUrl;
+    }
+    public set UserDBUrl(val: string) {
+        this.userDBUrl = val;
+    }
+    public get MainDBName(): string {
+        return this.mainDBName;
+    }
+    public set MainDBName(val: string) {
+        this.mainDBName = val;
+    }
+    public get MainDBUrl(): string {
+        return this.mainDBUrl;
+    }
+    public set MainDBUrl(val: string) {
+        this.mainDBUrl = val;
+    }
+}
+
+export class SearchQueryProperties {
+    private isOwner: boolean = false;
+    private isAdmin: boolean = false;
+    private isDateRange: boolean = false;
+    private isFixedDate: boolean = false;
+    private onlyActive: boolean = true;
+    private isOwnedBy: boolean = false;
+    private isRetailerSearch: boolean = false;
+    private isDeliveryDate: boolean = false;
+    private isDeliveryDateRange: boolean = false;
+    private isAmount: boolean = false;
+
+    private ordercreatedbyid: string = null;
+    private orderownedbyid: string = null;
+    private createddate: Date = new Date();
+    private updateddate: Date = new Date();
+    private retailerid: string = null;
+    private retailername: string = null;
+    private retailershopname: string = null;
+    private isactive: string = null;
+    private orderdeliverydate: Date = new Date();
+
+    constructor() {
+        // let curDate: Date = new Date();
+        // let curDay: number = curDate.getDate();
+
+        // this.createddate.setDate(curDay - 5);
+        // this.updateddate.setDate(curDay - 5);
+        // this.orderdeliverydate.setDate(curDay + 2);
+    }
+
+    public get OrderOwnedById(): string {
+        return this.orderownedbyid;
+    }
+    public set OrderOwnedById(val: string) {
+        this.orderownedbyid = val;
+    }
+    public get OrderCreatedById(): string {
+        return this.ordercreatedbyid;
+    }
+    public set OrderCreatedById(val: string) {
+        this.ordercreatedbyid = val;
+    }
+    public get IsAmount(): boolean {
+        return this.isAmount;
+    }
+    public set IsAmount(val: boolean) {
+        this.isAmount = val;
+    }
+    public get IsDeliveryDateRange(): boolean {
+        return this.isDeliveryDateRange;
+    }
+    public set IsDeliveryDateRange(val: boolean) {
+        this.isDeliveryDateRange = val;
+    }
+    public get IsDeliveryDate(): boolean {
+        return this.isDeliveryDate;
+    }
+    public set IsDeliveryDate(val: boolean) {
+        this.isDeliveryDate = val;
+    }
+    public get IsRetailerSearch(): boolean {
+        return this.isRetailerSearch;
+    }
+    public set IsRetailerSearch(val: boolean) {
+        this.isRetailerSearch = val;
+    }
+    public get IsOwnedBy(): boolean {
+        return this.isOwnedBy;
+    }
+    public set IsOwnedBy(val: boolean) {
+        this.isOwnedBy = val;
+    }
+    public get OnlyActive(): boolean {
+        return this.onlyActive;
+    }
+    public set OnlyActive(val: boolean) {
+        this.onlyActive = val;
+    }
+    public get IsOwner(): boolean {
+        return this.isOwner;
+    }
+    public set IsOwner(val: boolean) {
+        this.isOwner = val;
+    }
+    public get IsAdmin(): boolean {
+        return this.isAdmin;
+    }
+    public set IsAdmin(val: boolean) {
+        this.isAdmin = val;
+    }
+
+    public get IsDateRange(): boolean {
+        return this.isDateRange;
+    }
+    public set IsDateRange(val: boolean) {
+        this.isDateRange = val;
+    }
+    public get IsFixedDate(): boolean {
+        return this.isFixedDate;
+    }
+    public set IsFixedDate(val: boolean) {
+        this.isFixedDate = val;
+    }
+}
+
+// export class OrderSearchCriteria {
+//     private ordercreatedbyid: string = null;
+//     private orderownedbyid: string = null;
+//     private createddate: Date = new Date();
+//     private updateddate: Date = new Date();
+//     private retailerid: string = null;
+//     private retailername: string = null;
+//     private retailershopname: string = null;
+//     private isactive: string = null;
+//     private orderdeliverydate: Date = new Date();
+
+//     constructor() {
+//         let curDate: Date = new Date();
+//         let curDay: number = curDate.getDate();
+
+//         this.createddate.setDate(curDay - 5);
+//         this.updateddate.setDate(curDay - 5);
+//         this.orderdeliverydate.setDate(curDay + 2);
+//     }
+// }

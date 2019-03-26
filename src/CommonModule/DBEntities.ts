@@ -838,7 +838,7 @@ export class OrderProgress {
     private orderownedby: string;
     private orderownedbyid: string;
     private orderstatus: string;
-    private orderlaststatus: string;
+    //private orderlaststatus: string;
     private orderstatuschangedbyid: string;
     private timestamp: Date = new Date();
 
@@ -860,12 +860,12 @@ export class OrderProgress {
     public set OrderStatus(val: string) {
         this.orderstatus = val;
     }
-    public get OrderLastStatus(): string {
-        return this.orderlaststatus;
-    }
-    public set OrderLastStatus(val: string) {
-        this.orderlaststatus = val;
-    }
+    // public get OrderLastStatus(): string {
+    //     return this.orderlaststatus;
+    // }
+    // public set OrderLastStatus(val: string) {
+    //     this.orderlaststatus = val;
+    // }
     public get OrderStatusChangedById(): string {
         return this.orderstatuschangedbyid;
     }

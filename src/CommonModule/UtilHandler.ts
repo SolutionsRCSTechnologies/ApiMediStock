@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { RoutingHandler } from './RoutingHandler';
 import { Guid } from 'guid-typescript';
-import { MethodResponse, ResponseEntity } from './Entities';
+import { MethodResponse, ResponseEntity, DBConfiguaration } from './Entities';
 class Utilies {
     SendResponse(res: Response, obj: MethodResponse) {
         if (obj) {
@@ -68,6 +68,19 @@ class Utilies {
             throw e;
         }
         return outRes;
+    }
+
+    async GetDBDeatil(obj: MethodResponse) {
+        let retVal: DBConfiguaration = null;
+        try {
+            if (obj && obj.Result) {
+                retVal.UserDBName = obj.Result.userdbname && obj.Result.userdbname.length > 0 ? obj.Result.userdbname : '';
+                retVal.UserDBUrl = obj.Result.userdburl && obj.Result.userdburl.length > 0 ? obj.Result.userdburl : '';
+            }
+        } catch (error) {
+            throw error;
+        }
+        return retVal;
     }
 
     // async ShowEndPoints(reqData:any){

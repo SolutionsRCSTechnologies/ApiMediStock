@@ -79,23 +79,7 @@ class RoutingMethods {
         }
         return retVal;
     }
-    public async GetOrderList(reqData: any) {
-        let retVal: MethodResponse = new MethodResponse();
-        try {
-            if (await Util.ValidateRequestStructure(reqData)) {
-                let header: any = reqData.header;
-                let body: any = reqData.body;
-                retVal = await OrderHandle.GetOrderList(header, body);
-            } else {
-                retVal.ErrorCode = 1;
-                retVal.Message = 'Invalid request.';
-            }
-        }
-        catch (e) {
-            throw e;
-        }
-        return retVal;
-    }
+
 
     public async RegisterLicense(reqData: any) {
         let retVal: MethodResponse = new MethodResponse();
@@ -120,6 +104,75 @@ class RoutingMethods {
             if (reqData) {
                 let body: any = reqData.body;
                 retVal = await RegistrationHandle.GetAllUserIds(body);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Invalid request.';
+            }
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
+
+    public async GetOrderList(reqData: any) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (await Util.ValidateRequestStructure(reqData)) {
+                let header: any = reqData.header;
+                let body: any = reqData.body;
+                retVal = await OrderHandle.GetOrderList(header, body);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Invalid request.';
+            }
+        }
+        catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
+
+    public async GetOrderDetail(reqData: any) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (await Util.ValidateRequestStructure(reqData)) {
+                let header: any = reqData.header;
+                let body: any = reqData.body;
+                retVal = await OrderHandle.GetOrderDetail(header, body);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Invalid request.';
+            }
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
+
+    public async CreateOrder(reqData: any) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (await Util.ValidateRequestStructure(reqData)) {
+                let header: any = reqData.header;
+                let body: any = reqData.body;
+                retVal = await OrderHandle.CreateNewOrder(header, body);
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Invalid request.';
+            }
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
+
+    public async UpdateOrderStatus(reqData: any) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (await Util.ValidateRequestStructure(reqData)) {
+                let header: any = reqData.header;
+                let body: any = reqData.body;
+                retVal = await OrderHandle.UpdateOrderStatus(header, body);
             } else {
                 retVal.ErrorCode = 1;
                 retVal.Message = 'Invalid request.';
@@ -179,6 +232,30 @@ export const RoutingHandler = [
         handler: new RoutingMethods().GetAllUserIds,
         method: APIMethodType.POST,
         name: 'Get all user ids'
+    },
+    {
+        url: '/order/list',
+        handler: new RoutingMethods().GetOrderList,
+        method: APIMethodType.POST,
+        name: 'Get order list'
+    },
+    {
+        url: '/order/detail',
+        handler: new RoutingMethods().GetOrderDetail,
+        method: APIMethodType.POST,
+        name: 'Get order detail'
+    },
+    {
+        url: '/order/new',
+        handler: new RoutingMethods().CreateOrder,
+        method: APIMethodType.POST,
+        name: 'Create new order'
+    },
+    {
+        url: '/order/update/status',
+        handler: new RoutingMethods().UpdateOrderStatus,
+        method: APIMethodType.POST,
+        name: 'Update order status'
     }
 ];
 
