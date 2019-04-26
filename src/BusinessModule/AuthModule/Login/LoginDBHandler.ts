@@ -1,15 +1,16 @@
 import { MongoClient, Db } from 'mongodb';
 import { Guid } from 'guid-typescript';
 
-import { DBConfig, MainDBCollection } from '../../../DBModule/DBConfig';
+import { DBConfig, MainDBCollection, UserDBCollection } from '../../../DBModule/DBConfig';
 import { DBClient } from '../../../DBModule/DBClient';
-import { DBConfigEntity, MethodResponse } from '../../../CommonModule/Entities';
+import { DBConfigEntity, MethodResponse, DBConfiguaration } from '../../../CommonModule/Entities';
 import { LoginUtilHandle } from './LoginUtilHandler';
 import { isDate } from 'util';
 import { ActiveSession } from '../../../CommonModule/DBEntities';
 import { LicenseHandle } from '../License/LicenseHandler';
 
 class LoginDBHandler {
+
     async Login(req: any) {
         let retVal: MethodResponse = new MethodResponse();
         let mClient: MongoClient = null;
@@ -348,6 +349,54 @@ class LoginDBHandler {
                     break;
                 case 2:
                     retVal.Message = 'Some error occurred during database update.';
+                    break;
+                default:
+                    retVal.Result = result;
+                    break;
+            }
+        } catch (e) {
+            throw e;
+        } finally {
+            if (mClient) {
+                mClient.close();
+            }
+        }
+        return retVal;
+    }
+
+    async UpdateUserRole(userRole: string, userId: string, adminId: string, config: DBConfiguaration) {
+        let retVal: MethodResponse = new MethodResponse();
+        let mClient: MongoClient = null;
+        let errorCode: number = 0;
+        let result: any = null;
+        try {
+            if (adminId && adminId.length > 0 && userId && userId.length > 0 && userRole && userRole.length > 0) {
+                let isRoleUpdatePossible: boolean = false;
+                let initconfig: DBConfigEntity = DBConfig;
+                //initconfig.UserDBUrl = config.UserDBUrl;
+                //initconfig.UserDBName = config.UserDBName;
+                mClient = await DBClient.GetMongoClient(initconfig);
+                let db: Db = await mClient.db(config.UserDBName);
+                await db.collection(MainDBCollection.Users).find({ userid: { $in: [userId, adminId] } }).toArray().then(arr => {
+                    if (arr && arr.length > 0) {
+                        let adminUser = arr.find(u => u.userid == adminId);
+                        //if(adminUser && adminUser)
+                    } else {
+                        errorCode = 3;
+                    }
+                }).catch(err => {
+                    errorCode = 2;
+                });
+            } else {
+                errorCode = 1;
+            }
+            retVal.ErrorCode = errorCode;
+            switch (errorCode) {
+                case 1:
+                    retVal.Message = '';
+                    break;
+                case 2:
+                    retVal.Message = '';
                     break;
                 default:
                     retVal.Result = result;

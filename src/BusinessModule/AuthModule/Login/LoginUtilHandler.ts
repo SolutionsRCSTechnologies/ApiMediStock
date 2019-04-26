@@ -109,6 +109,34 @@ class LoginUtilHandler {
         }
         return isValid;
     }
+
+    async ValidateUpdateUserRoleRequest(reqData: any) {
+        let isValid: boolean = true;
+        try {
+            if (reqData) {
+                if (!(reqData.userid && reqData.userid.length > 0)) {
+                    isValid = false;
+                }
+                if (reqData.role && reqData.role.length > 0) {
+                    switch (reqData.role.toUpperCase()) {
+                        case 'USER':
+                        case 'ADMIN':
+                            break;
+                        default:
+                            isValid = false;
+                            break;
+                    }
+                } else {
+                    isValid = false;
+                }
+            } else {
+                isValid = false;
+            }
+        } catch (e) {
+            isValid = false;
+        }
+        return isValid;
+    }
 }
 
 export let LoginUtilHandle = new LoginUtilHandler();

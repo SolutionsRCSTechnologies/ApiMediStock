@@ -1,6 +1,7 @@
 import { LoginDBHandle } from './LoginDBHandler';
-import { MethodResponse } from '../../../CommonModule/Entities';
+import { MethodResponse, DBConfiguaration } from '../../../CommonModule/Entities';
 import { LoginUtilHandle } from './LoginUtilHandler';
+import { Util } from '../../../CommonModule/UtilHandler';
 
 class LoginOperations {
     async LoginProcess(header: any, body?: any) {
@@ -80,6 +81,27 @@ class LoginOperations {
             } else {
                 retVal.ErrorCode = 1;
                 retVal.Message = "Login request is empty, cannot validated.";
+            }
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
+
+    async UpdateUserRole(header: any, body: any) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            if (await LoginUtilHandle.ValidateUpdateUserRoleRequest(body)) {
+                let output: MethodResponse = await this.ValidateHeader(header);
+                if (output && output.ErrorCode == 0 && output.Result) {
+                    let config: DBConfiguaration = await Util.GetDBDeatil(output);
+                } else {
+                    retVal.ErrorCode = 2;
+                    retVal.Message = 'Header of the request is not valid.';
+                }
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'The role change request is invalid.';
             }
         } catch (e) {
             throw e;

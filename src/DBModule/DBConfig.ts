@@ -26,7 +26,9 @@ export const UserDBCollection = {
     Retailers: "Retailers",
     RetaileTransactions: "RetailTransactions",
     ProductsArchive: "ProductsArchive",
-    CollectionsStatus: "CollectionsStatus"
+    CollectionsStatus: "CollectionsStatus",
+    InventoryType: "InventoryType",
+    InventoryProdType: "InventoryProdType"
 };
 
 export const MainDBCollection = {
@@ -49,5 +51,7 @@ export const UserDBCollectionArr = [
     "Notifications",
     "SessionArchive",
     "OrderArchive",
-    "OrderDetail"
+    "OrderDetail",
+    "InventoryType",
+    "InventoryProdType"
 ];

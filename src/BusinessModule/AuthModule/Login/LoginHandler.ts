@@ -41,6 +41,16 @@ class LoginHandler {
         }
         return retVal;
     }
+
+    async UpdateUserRole(header: any, body: any) {
+        let retVal: MethodResponse = new MethodResponse();
+        try {
+            //retVal = 
+        } catch (e) {
+            throw e;
+        }
+        return retVal;
+    }
 }
 
 

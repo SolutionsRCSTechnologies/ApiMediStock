@@ -841,7 +841,14 @@ export class OrderProgress {
     //private orderlaststatus: string;
     private orderstatuschangedbyid: string;
     private timestamp: Date = new Date();
+    private ordersequence: number = 0;
 
+    public get OrderSequence(): number {
+        return this.ordersequence;
+    }
+    public set OrderSequence(val: number) {
+        this.ordersequence = val;
+    }
     public get OrderOwnedBy(): string {
         return this.orderownedby;
     }
@@ -884,15 +891,30 @@ export class OrderElement {
     private itemname: string;
     private inventoryid: string;
     private itemmrp: number;
+    private sellprice: number;
     private itemdiscountpercentage: number;
     private totaldiscountamount: number;
     private itemcompanyname: string;
-    private itemexparydate: Date;
+    private itemexpirydate: Date;
     private itemordersize: number;
+    private itembillsize: number;
     private totalprice: number;
     private totaldiscountedprice: number;
     private applydiscount: string = 'Y';
+    private itemexclude: string = 'N';
 
+    public get ItemExclude(): string {
+        return this.itemexclude;
+    }
+    public set ItemExclude(val: string) {
+        this.itemexclude = val;
+    }
+    public get ItemBillSize(): number {
+        return this.itembillsize;
+    }
+    public set ItemBillSize(val: number) {
+        this.itembillsize = val;
+    }
     public get ItemName(): string {
         return this.itemname;
     }
@@ -910,6 +932,12 @@ export class OrderElement {
     }
     public set ItemMrp(val: number) {
         this.itemmrp = val;
+    }
+    public get SellPrice(): number {
+        return this.sellprice;
+    }
+    public set SellPrice(val: number) {
+        this.sellprice = val;
     }
     public get ItemDiscountPercentage(): number {
         return this.itemdiscountpercentage;
@@ -929,11 +957,11 @@ export class OrderElement {
     public set ItemCompanyName(val: string) {
         this.itemcompanyname = val;
     }
-    public get ItemExparyDate(): Date {
-        return this.itemexparydate;
+    public get ItemExpiryDate(): Date {
+        return this.itemexpirydate;
     }
-    public set ItemExparyDate(val: Date) {
-        this.itemexparydate = val;
+    public set ItemExpiryDate(val: Date) {
+        this.itemexpirydate = val;
     }
     public get ItemOrderSize(): number {
         return this.itemordersize;
@@ -963,12 +991,15 @@ export class OrderElement {
 
 export class OrderItems {
     private items: OrderElement[];
-    private totalprice: number;
+    private totaldiscountedprice: number;
+    private totalnormalprice: number;
     private discountpercentage: number;
     private discountamount: number;
-    private amountpayable: number;
+    //private amountpayable: number;
     private amountpaid: number;
     private amountpending: number;
+    private finalprice: number;
+    private applyoveralldiscount: string;
     private itemsdelivered: OrderElement[];
 
     constructor() {
@@ -976,6 +1007,12 @@ export class OrderItems {
         this.itemsdelivered = [];
     }
 
+    public get ApplyOverAllDiscount(): string {
+        return this.applyoveralldiscount;
+    }
+    public set ApplyOverAllDiscount(val: string) {
+        this.applyoveralldiscount = val;
+    }
     public get AmountPending(): number {
         return this.amountpending;
     }
@@ -988,12 +1025,12 @@ export class OrderItems {
     public set AmountPaid(val: number) {
         this.amountpaid = val;
     }
-    public get AmountPayable(): number {
-        return this.amountpayable;
-    }
-    public set AmountPayable(val: number) {
-        this.amountpayable = val;
-    }
+    // public get AmountPayable(): number {
+    //     return this.amountpayable;
+    // }
+    // public set AmountPayable(val: number) {
+    //     this.amountpayable = val;
+    // }
     public get DiscountAmount(): number {
         return this.discountamount;
     }
@@ -1006,11 +1043,23 @@ export class OrderItems {
     public set DiscountPercentage(val: number) {
         this.discountpercentage = val;
     }
-    public get TotalPrice(): number {
-        return this.totalprice;
+    public get TotalDiscountedPrice(): number {
+        return this.totaldiscountedprice;
     }
-    public set TotalPrice(val: number) {
-        this.totalprice = val;
+    public set TotalDiscountedPrice(val: number) {
+        this.totaldiscountedprice = val;
+    }
+    public get TotalNormalPrice(): number {
+        return this.totalnormalprice;
+    }
+    public set TotalNormalPrice(val: number) {
+        this.totalnormalprice = val;
+    }
+    public get FinalPrice(): number {
+        return this.finalprice;
+    }
+    public set FinalPrice(val: number) {
+        this.finalprice = val;
     }
     public get Items(): OrderElement[] {
         return this.items;
@@ -1036,7 +1085,7 @@ export class OrderDetail {
     private orderdeliverydate: Date = new Date();
     private isactive: string = 'Y';
     private iscanceled: string = 'N';
-    private orderamount: number = 0;
+    //private orderamount: number = 0;
     private retailername: string;
     private retailerid: string;
     private retailershopname: string;
@@ -1086,10 +1135,10 @@ export class OrderDetail {
     public set CreatedDate(val: Date) {
         this.createddate = val;
     }
-    public get OrderDeliverBy(): string {
+    public get OrderDeliveredBy(): string {
         return this.orderdeliveredby;
     }
-    public set OrderDeliverBy(val: string) {
+    public set OrderDeliveredBy(val: string) {
         this.orderdeliveredby = val;
     }
     public get OrderDeliveredDate(): Date {
@@ -1140,12 +1189,12 @@ export class OrderDetail {
     public set RetailerName(val: string) {
         this.retailername = val;
     }
-    public get OrderAmount(): number {
-        return this.orderamount;
-    }
-    public set OrderAmount(val: number) {
-        this.orderamount = val;
-    }
+    // public get OrderAmount(): number {
+    //     return this.orderamount;
+    // }
+    // public set OrderAmount(val: number) {
+    //     this.orderamount = val;
+    // }
     public get IsCanceled(): string {
         return this.iscanceled;
     }
@@ -1193,5 +1242,283 @@ export class OrderDetail {
     }
     public set OrderOwnedById(val: string) {
         this.orderownedbyid = val;
+    }
+}
+
+export class InventoryType {
+    private _id: string;
+    private invtypeid: string;
+    private prodname: string;
+    private companyname: string;
+    private basecount: number;
+    private status: string;
+    private createddt: Date;
+    private updateddt: Date;
+    private createdby: string;
+    private updatedby: string;
+
+    public get Id(): string {
+        return this._id;
+    }
+    public set Id(val: string) {
+        this._id = val;
+        this.invtypeid = val;
+    }
+    public get InvTypeId(): string {
+        return this.invtypeid;
+    }
+    public set InvTypeId(val: string) {
+        this._id = val;
+        this.invtypeid = val;
+    }
+
+    public get Status(): string {
+        return this.status;
+    }
+    public set Status(val: string) {
+        this.status = val;
+    }
+    public get ProdName(): string {
+        return this.prodname;
+    }
+    public set ProdName(val: string) {
+        this.prodname = val;
+    }
+    public get CompanyName(): string {
+        return this.companyname;
+    }
+    public set CompanyName(val: string) {
+        this.companyname = val;
+    }
+    public get BaseCount(): number {
+        return this.basecount;
+    }
+    public set BaseCount(val: number) {
+        this.basecount = val;
+    }
+    public get UpdatedBy(): string {
+        return this.updatedby;
+    }
+    public set UpdatedBy(val: string) {
+        this.updatedby = val;
+    }
+    public get CreatedBy(): string {
+        return this.createdby;
+    }
+    public set CreatedBy(val: string) {
+        this.createdby = val;
+    }
+    public get UpdatedDt(): Date {
+        return this.updateddt;
+    }
+    public set UpdatedDt(val: Date) {
+        this.updateddt = val;
+    }
+    public get CreatedDt(): Date {
+        return this.createddt;
+    }
+    public set CreatedDt(val: Date) {
+        this.createddt = val;
+    }
+}
+
+export class InventoryProdType {
+    private _id: string;
+    private invid: string;
+    private productname: string;
+    private prodtype: string;
+    private prodspecification: string;
+    private expirydate: Date;
+    private count: number;
+    private mrp: number;
+    private sellprice: number;
+    private discountpercentage: number;
+    private createddt: Date;
+    private updateddt: Date;
+    private createdby: string;
+    private updatedby: string;
+
+    public get Id(): string {
+        return this._id;
+    }
+    public set Id(val: string) {
+        this._id = val;
+        this.invid = val;
+    }
+
+    public get InvId(): string {
+        return this.invid;
+    }
+    public set InvId(val: string) {
+        this._id = val;
+        this.invid = val;
+    }
+
+    public get UpdatedBy(): string {
+        return this.updatedby;
+    }
+    public set UpdatedBy(val: string) {
+        this.updatedby = val;
+    }
+    public get CreatedBy(): string {
+        return this.createdby;
+    }
+    public set CreatedBy(val: string) {
+        this.createdby = val;
+    }
+    public get UpdatedDt(): Date {
+        return this.updateddt;
+    }
+    public set UpdatedDt(val: Date) {
+        this.updateddt = val;
+    }
+    public get CreatedDt(): Date {
+        return this.createddt;
+    }
+    public set CreatedDt(val: Date) {
+        this.createddt = val;
+    }
+    public get DiscountPercentage(): number {
+        return this.discountpercentage;
+    }
+    public set DiscountPercentage(val: number) {
+        this.discountpercentage = val;
+    }
+    public get SellPrice(): number {
+        return this.sellprice;
+    }
+    public set SellPrice(val: number) {
+        this.sellprice = val;
+    }
+    public get MRP(): number {
+        return this.mrp;
+    }
+    public set MRP(val: number) {
+        this.mrp = val;
+    }
+    public get Count(): number {
+        return this.count;
+    }
+    public set Count(val: number) {
+        this.count = val;
+    }
+    public get ExpiryDate(): Date {
+        return this.expirydate;
+    }
+    public set ExpiryDate(val: Date) {
+        this.expirydate = val;
+    }
+    public get ProductSpecification(): string {
+        return this.prodspecification;
+    }
+    public set ProductSpecification(val: string) {
+        this.prodspecification = val;
+    }
+    public get ProductName(): string {
+        return this.productname;
+    }
+    public set ProductName(val: string) {
+        this.productname = val;
+    }
+    public get ProductType(): string {
+        return this.prodtype;
+    }
+    public set ProductType(val: string) {
+        this.prodtype = val;
+    }
+}
+
+export class Retailer {
+    private retailerid: string;
+    private retailername: string;
+    private retailershopname: string;
+    private druglicense: string;
+    private ownername: string;
+    private retailercontactnumber: number;
+    private ownerphonenumber: number;
+    private address: string;
+    private nearbylocation: string;
+    private pincode: string;
+    private city: string;
+    private district: string;
+    private maxpendingamount: number;
+
+    public get MaxPendingAmount(): number {
+        return this.maxpendingamount;
+    }
+    public set MaxPendingAmount(val: number) {
+        this.maxpendingamount = val;
+    }
+    public get District(): string {
+        return this.district;
+    }
+    public set District(val: string) {
+        this.district = val;
+    }
+    public get City(): string {
+        return this.city;
+    }
+    public set City(val: string) {
+        this.city = val;
+    }
+    public get PINCode(): string {
+        return this.pincode;
+    }
+    public set PINCode(val: string) {
+        this.pincode = val;
+    }
+    public get NearByLocation(): string {
+        return this.nearbylocation;
+    }
+    public set NearByLocation(val: string) {
+        this.nearbylocation = val;
+    }
+    public get Address(): string {
+        return this.address;
+    }
+    public set Address(val: string) {
+        this.address = val;
+    }
+    public get OwnerPhoneNumber(): number {
+        return this.ownerphonenumber;
+    }
+    public set OwnerPhoneNumber(val: number) {
+        this.ownerphonenumber = val;
+    }
+    public get RetailerContactNumber(): number {
+        return this.retailercontactnumber;
+    }
+    public set RetailerContactNumber(val: number) {
+        this.retailercontactnumber = val;
+    }
+    public get OwnerName(): string {
+        return this.ownername;
+    }
+    public set OwnerName(val: string) {
+        this.ownername = val;
+    }
+    public get DrugLicense(): string {
+        return this.druglicense;
+    }
+    public set DrugLicense(val: string) {
+        this.druglicense = val;
+    }
+    public get RetailerId(): string {
+        return this.retailerid;
+    }
+    public set RetailerId(val: string) {
+        this.retailerid = val;
+    }
+    public get RetailerShopName(): string {
+        return this.retailershopname;
+    }
+    public set RetailerShopName(val: string) {
+        this.retailershopname = val;
+    }
+    public get RetailerName(): string {
+        return this.retailername;
+    }
+    public set RetailerName(val: string) {
+        this.retailername = val;
     }
 }
