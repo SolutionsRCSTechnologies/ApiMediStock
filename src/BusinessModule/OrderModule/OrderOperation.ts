@@ -1,9 +1,9 @@
-import { RegistrationDetail, User, OrderDetail, Retailer, OrderElement, InventoryProdType } from '../../CommonModule/DBEntities';
+import { RegistrationDetail, User, OrderDetail, Retailer, OrderElement, InventoryProdType, OrderProgress, OrderApproverLevels } from '../../CommonModule/DBEntities';
 import { OrderItems } from "./../../CommonModule/DBEntities";
 import { OrderUtilHandle } from "./OrderUtilHandler";
 import { Util } from '../../CommonModule/UtilHandler';
 import { OrderDBHandle } from './OrderDBHandler';
-import { MethodResponse, DBConfiguaration, SearchQueryProperties } from '../../CommonModule/Entities';
+import { MethodResponse, DBConfiguaration, SearchQueryProperties, OrderStatus } from '../../CommonModule/Entities';
 import { LoginHandle } from '../AuthModule/Login/LoginHandler';
 
 class OrderOpHandler {
@@ -90,7 +90,16 @@ class OrderOpHandler {
                                         await this.UpdateInventories(invDetails, ord, config);
                                         // Insert the order in table
                                         retVal = await OrderDBHandle.InsertOrUpdateOrderDetail(ord, config);
-                                        //TBD: Change the progress (change order owner and update progress)
+                                        // Change the progress (change order owner and update progress)
+                                        let ordStat: OrderStatus = new OrderStatus();
+                                        ordStat.UserId = header.userid;
+                                        ordStat.UserName = output.UserName;
+                                        ordStat.OrderId = ord.OrderId;
+                                        let result: MethodResponse = await this.UpdateOrderProgress(ordStat, config);
+                                        if (result && result.ErrorCode != 0) {
+                                            retVal.ErrorCode = result.ErrorCode;
+                                            retVal.Message = result.Message;
+                                        }
                                         //TBD: Update RetailerTransaction table
                                     } else {
                                         retVal.ErrorCode = 6;
@@ -129,8 +138,30 @@ class OrderOpHandler {
 
     async UpdateOrderStatus(header: any, body: any) {
         let retVal: MethodResponse = new MethodResponse();
+        let output: MethodResponse = null;
+        let config: DBConfiguaration = null;
         try {
-            //TBD: Order Status Update
+            // Order Status Update
+            if (await OrderUtilHandle.ValidateOrderProgressRequest(body)) {
+                output = await LoginHandle.ValidateHeader(header);
+                if (output && output.ErrorCode == 0 && output.Result) {
+                    config = await Util.GetDBDeatil(output);
+                    if (config && config.UserDBName && config.UserDBName.length > 0) {
+                        let orderStat: OrderStatus = await OrderUtilHandle.GetOrderStatus(body);
+                        retVal = await this.UpdateOrderProgress(orderStat, config);
+                    } else {
+                        retVal.ErrorCode = 3;
+                        retVal.Message = 'No user database is available.';
+                    }
+                    retVal = await Util.SetOutputResponse(output, retVal);
+                } else {
+                    retVal.ErrorCode = 2;
+                    retVal.Message = 'User is not authenticated.';
+                }
+            } else {
+                retVal.ErrorCode = 1;
+                retVal.Message = 'Request body is not valid.';
+            }
         } catch (error) {
             throw error;
         }
@@ -388,12 +419,92 @@ class OrderOpHandler {
         }
     }
 
-    async UpdateOrderProgress(ordId: string, ownerId: string, config: DBConfiguaration) {
+    async UpdateOrderProgress(ordStatus: OrderStatus, config: DBConfiguaration) {
+        let retVal: MethodResponse = new MethodResponse();
+        let output: MethodResponse = null;
         try {
-
+            if (ordStatus) {
+                output = await OrderDBHandle.GetOrderById(ordStatus.OrderId, config);
+                if (output && output.ErrorCode == 0 && output.Result) {
+                    let ord: OrderDetail = await OrderUtilHandle.CreateOrderDetail(output.Result, null);
+                    let ordProgress: OrderProgress[] = ord ? ord.OrderFlow : [];
+                    if (ordProgress && ordProgress.length > 0) {
+                        ordProgress = ordProgress.sort(itm => itm.OrderSequence);
+                        let progStat: OrderProgress = ordProgress.pop();
+                        let lastStatus: string = progStat && progStat.OrderStatus && progStat.OrderStatus.length > 0 ? progStat.OrderStatus : '';
+                        let lastSeq: number = progStat && progStat.OrderSequence > 0 ? progStat.OrderSequence : 0;
+                        let ownerId: string = ordStatus.OwnerId;
+                        if (!(lastStatus && lastStatus.length > 0)) {
+                            lastStatus = 'CREATE';
+                        }
+                        output = null;
+                        output = await OrderDBHandle.GetStatusDetails(config);
+                        if (output && output.ErrorCode == 0 && output.Result) {
+                            let approvers: OrderApproverLevels[] = await OrderUtilHandle.GetOrderApprovers(output.Result);
+                            if (approvers && approvers.length > 0) {
+                                let lastApprovers: OrderApproverLevels = await approvers.find(obj => obj.StatusLebel == lastStatus && (obj.Active == 'Y' || obj.Active == 'y'));
+                                let nextStatus: string = ordStatus.Status;
+                                let nextApprovers: OrderApproverLevels = await approvers.find(obj => obj.StatusLebel == nextStatus && (obj.Active == 'Y' || obj.Active == 'y'));
+                                let approversCount: number = nextApprovers.Approvers && nextApprovers.Approvers.length > 0 ? nextApprovers.Approvers.length : -1;
+                                let isValid: boolean = false;
+                                if (ordStatus.IsDemoted) {
+                                    isValid = lastApprovers.FromDemoteStatuses && lastApprovers.FromDemoteStatuses.length > 0 && lastApprovers.FromDemoteStatuses.findIndex(itm => itm == nextStatus) > 0;
+                                } else {
+                                    isValid = lastApprovers.FromPromoteStatuses && lastApprovers.FromPromoteStatuses.length > 0 && lastApprovers.FromPromoteStatuses.findIndex(itm => itm == nextStatus) > 0;
+                                }
+                                if (isValid) {
+                                    if (ownerId && ownerId.length > 0) {
+                                        isValid = false;
+                                        isValid = nextApprovers.Approvers && nextApprovers.Approvers.length > 0 && nextApprovers.Approvers.findIndex(itm => itm == ownerId) > 0;
+                                    } else if (approversCount > 0) {
+                                        let indx: number = 0;
+                                        let time: number = new Date().getTime();
+                                        indx = time % (approversCount - 1);
+                                        ownerId = nextApprovers.Approvers[indx];
+                                    }
+                                    if (isValid && ownerId && ownerId.length > 0) {
+                                        let progress: OrderProgress = new OrderProgress();
+                                        progress.OrderOwnedById = ownerId;
+                                        progress.OrderStatus = nextStatus;
+                                        progress.OrderStatusChangedById = ordStatus.UserId;
+                                        progress.TimeStamp = new Date();
+                                        progress.OrderSequence = lastSeq + 1;
+                                        progress.OrderStatusNumber = ordStatus.StatusNumber;
+                                        progress.OrderLastStatus = lastStatus;
+                                        //TBD: Get Owner Name and User Name
+                                        retVal = await OrderDBHandle.UpdateOrderProgress(progress, ordStatus.OrderId, config);
+                                    } else {
+                                        retVal.ErrorCode = 114;
+                                        retVal.Message = 'Owner id is not available.';
+                                    }
+                                } else {
+                                    retVal.ErrorCode = 115;
+                                    retVal.Message = 'Given status is not valid.';
+                                }
+                            } else {
+                                retVal.ErrorCode = 116;
+                                retVal.Message = 'No approver is available in Users Database.';
+                            }
+                        } else {
+                            retVal.ErrorCode = output.ErrorCode;
+                            retVal.Message = output.Message;
+                        }
+                    } else {
+                        retVal.ErrorCode = 117;
+                        retVal.Message = 'Invalid order as no progress is available.';
+                    }
+                } else {
+                    retVal.ErrorCode = output.ErrorCode;
+                    retVal.Message = output.Message;
+                }
+            } else {
+                retVal.ErrorCode = 81;
+                retVal.Message = 'Order progress status is empty.';
+            }
         } catch (e) {
             throw e;
         }
+        return retVal;
     }
 
     /********End of Supporting Methods*********/

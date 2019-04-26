@@ -28,7 +28,9 @@ export const UserDBCollection = {
     ProductsArchive: "ProductsArchive",
     CollectionsStatus: "CollectionsStatus",
     InventoryType: "InventoryType",
-    InventoryProdType: "InventoryProdType"
+    InventoryProdType: "InventoryProdType",
+    OrderApproverLevels: "OrderApproverLevels",
+    OrderStatusEntry: "OrderStatusEntry"
 };
 
 export const MainDBCollection = {
@@ -53,5 +55,7 @@ export const UserDBCollectionArr = [
     "OrderArchive",
     "OrderDetail",
     "InventoryType",
-    "InventoryProdType"
+    "InventoryProdType",
+    "OrderApproverLevels",
+    "OrderStatusEntry"
 ];

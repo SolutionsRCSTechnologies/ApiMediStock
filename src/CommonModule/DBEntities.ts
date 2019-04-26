@@ -838,11 +838,18 @@ export class OrderProgress {
     private orderownedby: string;
     private orderownedbyid: string;
     private orderstatus: string;
-    //private orderlaststatus: string;
+    private orderstatusnumber: number;
+    private orderlaststatus: string;
     private orderstatuschangedbyid: string;
     private timestamp: Date = new Date();
     private ordersequence: number = 0;
 
+    public get OrderStatusNumber(): number {
+        return this.orderstatusnumber;
+    }
+    public set OrderStatusNumber(val: number) {
+        this.orderstatusnumber = val;
+    }
     public get OrderSequence(): number {
         return this.ordersequence;
     }
@@ -867,12 +874,12 @@ export class OrderProgress {
     public set OrderStatus(val: string) {
         this.orderstatus = val;
     }
-    // public get OrderLastStatus(): string {
-    //     return this.orderlaststatus;
-    // }
-    // public set OrderLastStatus(val: string) {
-    //     this.orderlaststatus = val;
-    // }
+    public get OrderLastStatus(): string {
+        return this.orderlaststatus;
+    }
+    public set OrderLastStatus(val: string) {
+        this.orderlaststatus = val;
+    }
     public get OrderStatusChangedById(): string {
         return this.orderstatuschangedbyid;
     }
@@ -1520,5 +1527,58 @@ export class Retailer {
     }
     public set RetailerName(val: string) {
         this.retailername = val;
+    }
+}
+
+export class OrderApproverLevels {
+    private ordstatuslebelid: string;
+    private statuslebel: string;
+    private statuslebelnumber: number;
+    private active: string;
+    private approvers: string[];
+    private frompromotestatuses: string[];
+    private fromdemotestatuses: string[];
+
+    public get FromDemoteStatuses(): string[] {
+        return this.fromdemotestatuses;
+    }
+    public set FromDemoteStatuses(val: string[]) {
+        this.fromdemotestatuses = val;
+    }
+    public get FromPromoteStatuses(): string[] {
+        return this.frompromotestatuses;
+    }
+    public set FromPromoteStatuses(val: string[]) {
+        this.frompromotestatuses = val;
+    }
+    public get OrdStatusLebelId(): string {
+        return this.ordstatuslebelid;
+    }
+    public set OrdStatusLebelId(val: string) {
+        this.ordstatuslebelid = val;
+    }
+    public get StatusLebel(): string {
+        return this.statuslebel;
+    }
+    public set StatusLebel(val: string) {
+        this.statuslebel = val;
+    }
+    public get StatusLebelNumber(): number {
+        return this.statuslebelnumber;
+    }
+    public set StatusLebelNumber(val: number) {
+        this.statuslebelnumber = val;
+    }
+    public get Active(): string {
+        return this.active;
+    }
+    public set Active(val: string) {
+        this.active = val;
+    }
+    public get Approvers(): string[] {
+        return this.approvers;
+    }
+    public set Approvers(val: string[]) {
+        this.approvers = val;
     }
 }

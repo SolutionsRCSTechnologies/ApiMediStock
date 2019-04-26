@@ -1,7 +1,7 @@
-import { LicenseDetail, LicensePurchase, OrderDetail, OrderProgress, OrderElement } from '../../CommonModule/DBEntities';
+import { LicenseDetail, LicensePurchase, OrderDetail, OrderProgress, OrderElement, OrderApproverLevels } from '../../CommonModule/DBEntities';
 import { OrderItems, Retailer } from "./../../CommonModule/DBEntities";
 import { LoginUtilHandle } from "./../AuthModule/Login/LoginUtilHandler";
-import { MethodResponse } from '../../CommonModule/Entities';
+import { MethodResponse, OrderStatus } from '../../CommonModule/Entities';
 import { isDate } from 'util';
 import { Double } from 'bson';
 
@@ -61,7 +61,6 @@ class OrderUtilHandler {
         return isValid;
     }
 
-
     async ValidateCreateOrderRequest(req: any) {
         let isValid: boolean = true;
         try {
@@ -72,6 +71,31 @@ class OrderUtilHandler {
             }
         } catch (e) {
             throw e;
+        }
+        return isValid;
+    }
+
+    async ValidateOrderProgressRequest(req: any) {
+        let isValid: boolean = true;
+        try {
+            if (req) {
+                if (!(req.orderid && req.orderid.length > 0)) {
+                    isValid = false;
+                }
+                if (!(req.ownerid && req.ownerid.length > 0)) {
+                    isValid = false;
+                }
+                if (!(req.userid && req.userid.length > 0)) {
+                    isValid = false;
+                }
+                if (!(req.status && req.status.length > 0)) {
+                    isValid = false;
+                }
+            } else {
+                isValid = false;
+            }
+        } catch (e) {
+            isValid = false;
         }
         return isValid;
     }
@@ -285,11 +309,19 @@ class OrderUtilHandler {
                         } else {
                             prog.OrderStatus = '';
                         }
+                        if (ele.orderstatusnumber && ele.orderstatusnumber > 0) {
+                            prog.OrderStatusNumber = ele.orderstatusnumber;
+                        } else {
+                            prog.OrderStatusNumber = -1;
+                        }
                         if (ele.timestamp && isDate(ele.timestamp)) {
                             prog.TimeStamp = ele.timestamp;
                         }
                         if (ele.ordersequence && ele.ordersequence > 0) {
                             prog.OrderSequence = ele.ordersequence;
+                        }
+                        if (ele.orderlaststatus && ele.orderlaststatus.length > 0) {
+                            prog.OrderLastStatus = ele.orderlaststatus;
                         }
                         retVal.push(prog);
                     }
@@ -447,6 +479,72 @@ class OrderUtilHandler {
             throw error;
         }
         return retVal;
+    }
+
+    async GetOrderStatus(req: any) {
+        let ordStat: OrderStatus = null;
+        try {
+            if (req) {
+                ordStat = new OrderStatus();
+                if (req.ownerid && req.ownerid.length > 0) {
+                    ordStat.OwnerId = req.ownerid;
+                }
+                if (req.ownername && req.ownername.length > 0) {
+                    ordStat.OwnerName = req.ownername;
+                }
+                if (req.orderid && req.orderid.length > 0) {
+                    ordStat.OrderId = req.orderid;
+                }
+                if (req.userid && req.userid.length > 0) {
+                    ordStat.UserId = req.userid;
+                }
+                if (req.username && req.username.length > 0) {
+                    ordStat.UserName = req.username;
+                }
+                if (req.status && req.status.length > 0) {
+                    ordStat.Status = req.status;
+                }
+                if (req.sequence && req.sequence > 0) {
+                    ordStat.Sequence = req.sequence;
+                }
+                if (req.statusnumber && req.statusnumber > 0) {
+                    ordStat.StatusNumber = req.statusnumber;
+                }
+                if (req.isdemoted && req.isdemoted.length > 0) {
+                    ordStat.IsDemoted = (req.isdemoted == 'Y' || req.isdemoted == 'y');
+                }
+            }
+        } catch (e) {
+            throw e;
+        }
+        return ordStat;
+    }
+
+    async GetOrderApprovers(req: any[]) {
+        let statusLevels: OrderApproverLevels[] = null;
+        try {
+            if (req && req.length > 0) {
+                statusLevels = [];
+                let statLevel: OrderApproverLevels = null;
+                req.forEach(ele => {
+                    if (ele) {
+                        statLevel = new OrderApproverLevels();
+                        statLevel.OrdStatusLebelId = ele.statuslebelid;
+                        statLevel.StatusLebel = ele.statuslebel;
+                        statLevel.StatusLebelNumber = ele.statuslebelnumber;
+                        statLevel.FromDemoteStatuses = ele.fromdemotestatuses;
+                        statLevel.FromPromoteStatuses = ele.frompromotestatuses;
+                        statLevel.Approvers = ele.approvers;
+                        statLevel.Active = ele.active;
+
+                        statusLevels.push(statLevel);
+                    }
+                });
+            }
+        } catch (e) {
+            throw e;
+        }
+        return statusLevels;
     }
 }
 

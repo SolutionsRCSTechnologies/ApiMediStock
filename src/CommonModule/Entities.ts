@@ -386,3 +386,70 @@ export class SearchQueryProperties {
 //         this.orderdeliverydate.setDate(curDay + 2);
 //     }
 // }
+
+export class OrderStatus {
+    private orderid: string;
+    private userid: string;
+    private username: string;
+    private ownerid: string;
+    private ownername: string;
+    private status: string;
+    private sequence: number;
+    private statusnumber: number;
+    private isdemoted: boolean = false;
+
+    public get IsDemoted(): boolean {
+        return this.isdemoted;
+    }
+    public set IsDemoted(val: boolean) {
+        this.isdemoted = val;
+    }
+    public get StatusNumber(): number {
+        return this.statusnumber;
+    }
+    public set StatusNumber(val: number) {
+        this.statusnumber = val;
+    }
+    public get Sequence(): number {
+        return this.sequence;
+    }
+    public set Sequence(val: number) {
+        this.sequence = val;
+    }
+    public get Status(): string {
+        return this.status;
+    }
+    public set Status(val: string) {
+        this.status = val;
+    }
+    public get OrderId(): string {
+        return this.orderid;
+    }
+    public set OrderId(val: string) {
+        this.orderid = val;
+    }
+    public get UserId(): string {
+        return this.userid;
+    }
+    public set UserId(val: string) {
+        this.userid = val;
+    }
+    public get UserName(): string {
+        return this.username;
+    }
+    public set UserName(val: string) {
+        this.username = val;
+    }
+    public get OwnerId(): string {
+        return this.ownerid;
+    }
+    public set OwnerId(val: string) {
+        this.ownerid = val;
+    }
+    public get OwnerName(): string {
+        return this.ownername;
+    }
+    public set OwnerName(val: string) {
+        this.ownername = val;
+    }
+}
